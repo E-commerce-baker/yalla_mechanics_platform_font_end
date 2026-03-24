@@ -1,32 +1,3 @@
-/* ══════════════════════════════════════════════════════════════════
-   ReportViewPage.jsx
-   أضف هذا المكوّن لـ UserDashboard.jsx
-   يُفتح من صفحة MyBreakdownsPage عندما b.reportPdf موجود
-   ══════════════════════════════════════════════════════════════════ */
-
-/* ─── كيفية الاستدعاء ───────────────────────────────────────────
-   في MyBreakdownsPage أضف زر لكل b.reportPdf موجود:
-     {b.reportPdf?.path && (
-       <button className="btn-view-report" onClick={() => onViewReport(b)}>
-         📄 التقرير والتقييم
-       </button>
-     )}
-
-   في renderPage() أضف:
-     if (subPage?.type === 'view-report') return (
-       <ReportViewPage
-         api={api}
-         breakdown={subPage.breakdown}
-         setToast={setToast}
-         onBack={() => setSubPage(null)}
-       />
-     );
-
-   في MyBreakdownsPage:
-     onViewProposals={bd=>setSubPage({type:'breakdown-proposals',breakdown:bd})}
-     onViewReport={bd=>setSubPage({type:'view-report',breakdown:bd})}
-   ─────────────────────────────────────────────────────────────── */
-
 const ReportViewPage = ({ api, breakdown, setToast, onBack }) => {
   const [report, setReport]         = useState(null);
   const [loading, setLoading]       = useState(true);

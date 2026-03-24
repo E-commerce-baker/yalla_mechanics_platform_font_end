@@ -751,7 +751,10 @@ export default function AdminDashboard() {
       </div>
     );
   }
-
+  const handleLogout = () => {
+  localStorage.removeItem('accessToken');
+  window.location.href = '/auth'; // أو أي مسار تسجيل الدخول لديك
+};
   const renderPage = () => {
     if (page === 'overview')   return <OverviewPage         api={api} setToast={setToast} />;
     if (page === 'profile')    return <ProfilePage          api={api} user={user} onUpdate={setUser} setToast={setToast} />;
@@ -924,6 +927,16 @@ export default function AdminDashboard() {
               {n.badge > 0 && <span className="nav-badge">{n.badge}</span>}
             </button>
           ))}
+            <button
+    className="nav-btn"
+    onClick={handleLogout}
+    style={{ color:'rgba(239,68,68,.7)', width:'100%' }}
+  >
+    <div className="nav-left">
+      <span className="nav-ico">🚪</span>
+      تسجيل الخروج
+    </div>
+  </button>
         </nav>
 
         <main className="main">{renderPage()}</main>
@@ -933,3 +946,4 @@ export default function AdminDashboard() {
     </>
   );
 }
+

@@ -2,15 +2,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
-// ════════════════════════════════════════════════════════════════
-//  src/app/auth/page.js
-//
-//  After login/register → redirects by role:
-//    user      → /user
-//    mechanic  → /mechanics
-//    admin     → /admin
-// ════════════════════════════════════════════════════════════════
-
 const API_URL = 'http://localhost:3001/api/auth';
 
 const ROLES = [
@@ -32,9 +23,8 @@ export default function AuthPage() {
   const [message,  setMessage]  = useState({ type: '', text: '' });
   const [loading,  setLoading]  = useState(false);
   const [mounted,  setMounted]  = useState(false);
-  const [checking, setChecking] = useState(true); // checking existing token on mount
+  const [checking, setChecking] = useState(true);
 
-  /* ── on mount: if valid token exists, redirect immediately ── */
   useEffect(() => {
     setMounted(true);
     const at   = localStorage.getItem('accessToken');
@@ -46,7 +36,6 @@ export default function AuthPage() {
     }
   }, [router]);
 
-  /* ── base fetch ── */
   const authFetch = useCallback(async (path, options = {}, tok = '') => {
     const headers = { 'Content-Type': 'application/json' };
     if (tok) headers['Authorization'] = `Bearer ${tok}`;
@@ -56,7 +45,6 @@ export default function AuthPage() {
     return data;
   }, []);
 
-  /* ── save tokens + role then redirect ── */
   const handleSuccess = (accessToken, refreshToken, user) => {
     localStorage.setItem('accessToken',  accessToken);
     localStorage.setItem('refreshToken', refreshToken);
@@ -67,7 +55,6 @@ export default function AuthPage() {
     router.push(dest);
   };
 
-  /* ── POST /login ── */
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -86,7 +73,6 @@ export default function AuthPage() {
     } finally { setLoading(false); }
   };
 
-  /* ── POST /register ── */
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
@@ -136,7 +122,6 @@ export default function AuthPage() {
         @keyframes blobFloat2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(25px,-20px) scale(1.04)}}
         @keyframes toastPop{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
 
-        /* ── page shell ── */
         .shell{
           min-height:100vh;display:grid;
           grid-template-columns:1fr 1fr;
@@ -144,7 +129,6 @@ export default function AuthPage() {
         }
         @media(max-width:768px){.shell{grid-template-columns:1fr}.left-panel{display:none!important}}
 
-        /* ── left decorative panel ── */
         .left-panel{
           background:linear-gradient(145deg,#0f0f1a 0%,#111128 60%,#0a0a15 100%);
           display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -166,7 +150,6 @@ export default function AuthPage() {
         .lp-feat-text .ft{font-size:.9rem;font-weight:700;color:#fff}
         .lp-feat-text .fs{font-size:.78rem;color:rgba(255,255,255,.35)}
 
-        /* ── right: form panel ── */
         .right-panel{
           display:flex;align-items:center;justify-content:center;
           padding:2rem 1rem;
@@ -174,7 +157,6 @@ export default function AuthPage() {
         }
         .rp-blob{position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(99,102,241,.08) 0%,transparent 60%);top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;pointer-events:none}
 
-        /* ── card ── */
         .card{
           width:100%;max-width:430px;position:relative;z-index:1;
           background:rgba(255,255,255,.038);
@@ -184,22 +166,18 @@ export default function AuthPage() {
           animation:fadeUp .55s cubic-bezier(.16,1,.3,1) both;
         }
 
-        /* mobile brand (shows only on small screens) */
         .mobile-brand{display:none;align-items:center;gap:.7rem;justify-content:center;margin-bottom:1.8rem}
         @media(max-width:768px){.mobile-brand{display:flex}}
         .mob-logo{width:44px;height:44px;background:linear-gradient(135deg,#6366f1,#ec4899);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.3rem}
         .mob-name{font-family:'Sora',sans-serif;font-size:1.3rem;font-weight:700;color:#fff}
 
-        /* ── heading ── */
         .card-title{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:.3rem}
         .card-sub{font-size:.88rem;color:rgba(255,255,255,.32);margin-bottom:1.8rem}
 
-        /* ── tabs ── */
         .tabs{display:flex;background:rgba(255,255,255,.05);border-radius:14px;padding:4px;margin-bottom:1.8rem;gap:4px}
         .tab{flex:1;padding:.6rem;border:none;border-radius:11px;font-family:'Tajawal',sans-serif;font-size:.9rem;font-weight:500;cursor:pointer;transition:all .22s;background:transparent;color:rgba(255,255,255,.35)}
         .tab.on{background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff;font-weight:700;box-shadow:0 4px 18px rgba(99,102,241,.4)}
 
-        /* ── form ── */
         .form{display:flex;flex-direction:column;gap:.85rem}
         .fg{display:flex;flex-direction:column;gap:.32rem}
         .lbl{font-size:.78rem;font-weight:600;color:rgba(255,255,255,.4);padding-right:2px}
@@ -217,7 +195,6 @@ export default function AuthPage() {
         .inp::placeholder{color:rgba(255,255,255,.2)}
         .inp:focus{border-color:#6366f1;background:rgba(99,102,241,.09);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
 
-        /* ── role selector ── */
         .role-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
         .role-btn{
           padding:.68rem .5rem;border-radius:12px;
@@ -230,7 +207,6 @@ export default function AuthPage() {
         .role-btn.sel{background:rgba(99,102,241,.18);border-color:rgba(99,102,241,.55);color:#a5b4fc;font-weight:700}
         .role-btn:hover:not(.sel){background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18)}
 
-        /* ── submit btn ── */
         .btn-sub{
           margin-top:.3rem;padding:.9rem;
           background:linear-gradient(135deg,#6366f1,#8b5cf6);
@@ -244,10 +220,8 @@ export default function AuthPage() {
         .btn-sub:active:not(:disabled){transform:translateY(0)}
         .btn-sub:disabled{opacity:.55;cursor:not-allowed}
 
-        /* ── spinner ── */
         .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:rot .65s linear infinite;flex-shrink:0}
 
-        /* ── toast ── */
         .toast{
           display:flex;align-items:center;gap:.55rem;
           padding:.75rem 1rem;border-radius:12px;
@@ -258,17 +232,14 @@ export default function AuthPage() {
         .t-ok{background:rgba(16,185,129,.11);color:#6ee7b7;border:1px solid rgba(16,185,129,.22)}
         .t-err{background:rgba(239,68,68,.11);color:#fca5a5;border:1px solid rgba(239,68,68,.22)}
 
-        /* ── divider ── */
         .divider{display:flex;align-items:center;gap:.75rem;margin:.5rem 0}
         .div-line{flex:1;height:1px;background:rgba(255,255,255,.07)}
         .div-txt{font-size:.75rem;color:rgba(255,255,255,.22)}
 
-        /* ── footer link ── */
         .flink{text-align:center;margin-top:1.1rem;font-size:.85rem;color:rgba(255,255,255,.3)}
         .flink span{color:#818cf8;cursor:pointer;font-weight:600;transition:color .2s}
         .flink span:hover{color:#a5b4fc}
 
-        /* ── redirect hint ── */
         .redirect-hints{display:flex;flex-direction:column;gap:.45rem;margin-top:1.4rem;padding-top:1.2rem;border-top:1px solid rgba(255,255,255,.06)}
         .rh-row{display:flex;align-items:center;gap:.6rem;font-size:.78rem;color:rgba(255,255,255,.28)}
         .rh-arrow{color:#6366f1;font-weight:700}
@@ -276,7 +247,6 @@ export default function AuthPage() {
 
       <div className="shell">
 
-        {/* ══ LEFT decorative panel ══ */}
         <div className="left-panel">
           <div className="lp-blob1" />
           <div className="lp-blob2" />
@@ -312,12 +282,10 @@ export default function AuthPage() {
           </div>
         </div>
 
-        {/* ══ RIGHT form panel ══ */}
         <div className="right-panel">
           <div className="rp-blob" />
           <div className="card">
 
-            {/* mobile brand */}
             <div className="mobile-brand">
               <div className="mob-logo">🔐</div>
               <div className="mob-name">منصة يلاّ</div>
@@ -326,13 +294,11 @@ export default function AuthPage() {
             <div className="card-title">{isLogin ? 'مرحباً بعودتك' : 'إنشاء حساب جديد'}</div>
             <div className="card-sub">{isLogin ? 'سجّل دخولك للمتابعة' : 'انضم إلى منصة يلاّ اليوم'}</div>
 
-            {/* tabs */}
             <div className="tabs">
               <button className={`tab ${isLogin ? 'on' : ''}`}  onClick={() => switchView(true)}>تسجيل الدخول</button>
               <button className={`tab ${!isLogin ? 'on' : ''}`} onClick={() => switchView(false)}>حساب جديد</button>
             </div>
 
-            {/* toast */}
             {message.text && (
               <div className={`toast ${message.type === 'error' ? 't-err' : 't-ok'}`}
                 onClick={() => setMessage({ type: '', text: '' })}>
@@ -340,10 +306,8 @@ export default function AuthPage() {
               </div>
             )}
 
-            {/* form */}
             <form onSubmit={isLogin ? handleLogin : handleRegister} className="form">
 
-              {/* register-only fields */}
               {!isLogin && (
                 <>
                   <div className="fg">
@@ -363,7 +327,6 @@ export default function AuthPage() {
                 </>
               )}
 
-              {/* shared fields */}
               <div className="fg">
                 <label className="lbl">اسم المستخدم</label>
                 <div className="iw"><span className="iico">🪪</span>
@@ -383,7 +346,6 @@ export default function AuthPage() {
                 </div>
               </div>
 
-              {/* role picker — register only */}
               {!isLogin && (
                 <div className="fg">
                   <label className="lbl">نوع الحساب</label>
@@ -410,7 +372,6 @@ export default function AuthPage() {
                 : <>لديك حساب بالفعل؟ <span onClick={() => switchView(true)}>قم بتسجيل الدخول</span></>}
             </div>
 
-            {/* redirect hint */}
             <div className="redirect-hints">
               <div className="rh-row"><span>👤 مستخدم</span><span className="rh-arrow">←</span><span>/user</span></div>
               <div className="rh-row"><span>🔧 ميكانيكي</span><span className="rh-arrow">←</span><span>/mechanics</span></div>

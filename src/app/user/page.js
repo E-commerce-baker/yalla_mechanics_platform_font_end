@@ -50,7 +50,6 @@ const StatusBadge = ({ status }) => {
   return <span style={{ fontSize:'.72rem', fontWeight:700, padding:'.2rem .6rem', borderRadius:20, background:s.bg, color:s.color, border:`1px solid ${s.color}33` }}>{s.icon} {s.label}</span>;
 };
 
-/* ════════════ 1 — Profile ════════════ */
 const ProfilePage = ({ api, initialUser, onUpdate, setToast }) => {
   const [form, setForm] = useState({ username:initialUser?.username||'', fullName:initialUser?.fullName||'', email:initialUser?.email||'', bio:initialUser?.profileData?.bio||'', phone:initialUser?.profileData?.phone||'' });
   const [loading, setLoading] = useState(false);
@@ -81,7 +80,6 @@ const ProfilePage = ({ api, initialUser, onUpdate, setToast }) => {
   );
 };
 
-/* ════════════ 2 — Mechanics ════════════ */
 const MechanicsPage = ({ api, setToast, onSelectMechanic }) => {
   const [mechanics, setMechanics] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -111,7 +109,6 @@ const MechanicsPage = ({ api, setToast, onSelectMechanic }) => {
   );
 };
 
-/* ════════════ 3 — Mechanic Reviews ════════════ */
 const MechanicReviewsPage = ({ api, mechanic, setToast, onBack }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -136,7 +133,6 @@ const MechanicReviewsPage = ({ api, mechanic, setToast, onBack }) => {
   );
 };
 
-/* ════════════ 4 — Write Review ════════════ */
 const WriteReviewPage = ({ api, mechanic, setToast, onBack }) => {
   const [form, setForm] = useState({ rating:0, comment:'' });
   const [loading, setLoading] = useState(false);
@@ -161,7 +157,6 @@ const WriteReviewPage = ({ api, mechanic, setToast, onBack }) => {
   );
 };
 
-/* ════════════ 5 — My Reviews ════════════ */
 const MyReviewsPage = ({ api, setToast }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -180,7 +175,6 @@ const MyReviewsPage = ({ api, setToast }) => {
   );
 };
 
-/* ════════════ 6 — Post Breakdown ════════════ */
 const CAR_BRANDS = ['تويوتا','هوندا','نيسان','كيا','هيونداي','فورد','شيفروليه','بي إم دبليو','مرسيدس','أودي','فولكس واجن','مازدا','ميتسوبيشي','سوزوكي','جيب','لكزس','إنفينيتي','بورشه','لاند روفر','فولفو','أخرى'];
 const FUEL_TYPES  = ['بنزين','ديزل','كهربائي','هايبرد'];
 const TRANS_TYPES = ['أوتوماتيك','يدوي (عادي)'];
@@ -293,7 +287,6 @@ const PostBreakdownPage = ({ accessToken, setToast, onDone }) => {
   );
 };
 
-/* ════════════ 7 — My Breakdowns (مع زر عرض الاقتراحات) ════════════ */
 const MyBreakdownsPage = ({ api, setToast, onNew, onViewProposals }) => {
   const [breakdowns, setBreakdowns] = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -371,7 +364,6 @@ const MyBreakdownsPage = ({ api, setToast, onNew, onViewProposals }) => {
   );
 };
 
-/* ════════════ 8 — Breakdown Proposals (قبول / رفض) ════════════ */
 const BreakdownProposalsPage = ({ api, breakdown, setToast, onBack, onAccepted }) => {
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -463,7 +455,6 @@ const BreakdownProposalsPage = ({ api, breakdown, setToast, onBack, onAccepted }
   );
 };
 
-/* ════════════ MAIN APP ════════════ */
 export default function UserDashboard() {
   const [accessToken] = useState(()=>localStorage.getItem('accessToken')||'');
   const [user, setUser]       = useState(null);
@@ -641,7 +632,6 @@ export default function UserDashboard() {
         .center-msg{text-align:center;padding:3rem;color:rgba(255,255,255,.35);font-size:.95rem;display:flex;align-items:center;justify-content:center;gap:.6rem}
         .empty-state{text-align:center;padding:4rem 2rem;color:rgba(255,255,255,.3);font-size:.95rem;display:flex;flex-direction:column;align-items:center}
 
-        /* ═══ Proposal cards ═══ */
         .proposal-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:1.3rem 1.5rem;transition:border-color .2s,transform .15s}
         .proposal-card:hover{border-color:rgba(14,165,233,.25);transform:translateY(-1px)}
         .proposal-accepted{border-color:rgba(16,185,129,.35)!important;background:rgba(16,185,129,.04)!important}

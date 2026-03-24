@@ -1,34 +1,5 @@
-/* ══════════════════════════════════════════════════════════════════
-   ReportPage.jsx
-   أضف هذا المكوّن لـ MechanicDashboard.jsx
-   ويُستدعى من صفحة BreakdownsPage أو MyProposalsPage
-   عندما status === 'inProgress'
-   ══════════════════════════════════════════════════════════════════ */
-
-/* ─── كيفية الاستدعاء ───────────────────────────────────────────
-   في BreakdownsPage أضف زر:
-     {b.status === 'inProgress' && (
-       <button className="btn-report" onClick={() => onReport(b)}>
-         📄 رفع تقرير الإصلاح
-       </button>
-     )}
-
-   في renderPage() أضف:
-     if (page === 'report') return (
-       <ReportPage
-         api={api}
-         accessToken={accessToken}
-         breakdown={reportBreakdown}
-         setToast={setToast}
-         onDone={() => { setPage('breakdowns'); setReportBreakdown(null); }}
-       />
-     );
-
-   في navItems لا تضيفها للـ sidebar (صفحة وسيطة)
-   ─────────────────────────────────────────────────────────────── */
-
 const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
-  const [step, setStep]         = useState(1); // 1=بيانات, 2=معاينة PDF, 3=رفع
+  const [step, setStep]         = useState(1); 
   const [submitting, setSubmitting] = useState(false);
   const [pdfBlob, setPdfBlob]   = useState(null);
   const [pdfUrl, setPdfUrl]     = useState(null);
@@ -53,12 +24,8 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
   const totalParts = form.spareParts.reduce((s, p) => s + (p.quantity * p.price), 0);
   const grandTotal = form.finalPrice ? Number(form.finalPrice) : totalParts;
 
-  /* ────────────────────────────────────────────────
-     توليد PDF في المتصفح بدون مكتبات خارجية
-     باستخدام HTML → Canvas → PDF (jsPDF CDN)
-     ──────────────────────────────────────────────── */
+
   const generatePdf = async () => {
-    // تحميل jsPDF من CDN لو لم تكن محملة
     if (!window.jspdf) {
       await new Promise((res, rej) => {
         const s = document.createElement('script');
@@ -75,9 +42,8 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     const margin = 18;
     let y = 20;
 
-    // ── دعم العربية بدون خط خارجي ──────────────────────────
-    // نستخدم Helvetica وعكس النص عند الحاجة
-    const rtl = (text) => text; // jsPDF لا يدعم RTL بدون addFont، نعرضه LTR
+   
+    const rtl = (text) => text; 
 
     const color = {
       primary:  [30,  130, 230],
@@ -93,21 +59,17 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     const line  = (x1,y1,x2,y2,c,w=0.3)=>{ doc.setDrawColor(...c); doc.setLineWidth(w); doc.line(x1,y1,x2,y2); };
     const txt   = (t,x,yy,sz,c,bold=false,align='left')=>{ doc.setFont('helvetica', bold?'bold':'normal'); doc.setFontSize(sz); doc.setTextColor(...c); doc.text(String(t),x,yy,{align}); };
 
-    // ── Header bar ─────────────────────────────────────────
     rect(0, 0, W, 38, color.primary);
     txt('Repair Report', W/2, 15, 20, color.white, true, 'center');
     txt('AutoCare Platform', W/2, 23, 9, [180,220,255], false, 'center');
 
-    // تاريخ
     const now = new Date().toLocaleDateString('en-GB');
     txt(`Date: ${now}`, W - margin, 32, 8, [200,230,255], false, 'right');
     y = 48;
 
-    // ── Car info box ───────────────────────────────────────
     rect(margin, y, W - margin*2, 22, color.light);
     doc.setDrawColor(...color.primary); doc.setLineWidth(0.4);
     doc.rect(margin, y, W - margin*2, 22);
-    // left border accent
     rect(margin, y, 3, 22, color.primary);
 
     const car = breakdown.carInfo || {};
@@ -116,17 +78,14 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     txt(`Fuel: ${car.fuelType || '-'}   Transmission: ${car.transmission || '-'}   KM: ${car.mileage?.toLocaleString() || '-'}`, margin + 6, y + 18, 8, color.gray);
     y += 28;
 
-    // ── Problem title ──────────────────────────────────────
     txt('Problem', margin, y, 11, color.dark, true);
     line(margin, y+2, W-margin, y+2, color.primary, 0.4);
     y += 8;
-    // wrap text
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...color.gray);
     const titleLines = doc.splitTextToSize(breakdown.title || '-', W - margin*2);
     doc.text(titleLines, margin, y);
     y += titleLines.length * 5 + 4;
 
-    // ── Solution summary ───────────────────────────────────
     txt('Solution Summary', margin, y, 11, color.dark, true);
     line(margin, y+2, W-margin, y+2, color.green, 0.4);
     y += 8;
@@ -135,7 +94,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     doc.text(solLines, margin, y);
     y += solLines.length * 5 + 6;
 
-    // ── Spare parts table ──────────────────────────────────
     const validParts = form.spareParts.filter(p => p.name.trim());
     if (validParts.length > 0) {
       txt('Spare Parts', margin, y, 11, color.dark, true);
@@ -160,20 +118,17 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
         y += 7;
       });
 
-      // Parts total row
       rect(margin, y, W - margin*2, 7, color.light);
       txt('Parts Subtotal', cols.name + 2, y+5, 8, color.dark, true);
       txt(`${totalParts.toFixed(2)} ${form.currency}`, cols.total + 2, y+5, 8, color.dark, true);
       y += 10;
     }
 
-    // ── Final price box ────────────────────────────────────
     rect(margin, y, W - margin*2, 16, color.primary);
     txt('Total Price', margin + 6, y + 10, 12, color.white, true);
     txt(`${grandTotal.toFixed(2)} ${form.currency}`, W - margin - 4, y + 10, 14, color.amber, true, 'right');
     y += 22;
 
-    // ── Notes ─────────────────────────────────────────────
     if (form.mechanicNotes.trim()) {
       txt('Mechanic Notes', margin, y, 11, color.dark, true);
       line(margin, y+2, W-margin, y+2, color.gray, 0.3);
@@ -184,7 +139,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
       y += noteLines.length * 5 + 6;
     }
 
-    // ── Mechanic info ──────────────────────────────────────
     const user = breakdown.assignedMechanicInfo || {};
     if (y < 240) y = 240;
     line(margin, y, W-margin, y, color.light, 0.4);
@@ -194,7 +148,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     y += 5;
     if (user.phone) { txt('Phone:', margin, y, 8, color.gray); txt(user.phone, margin+18, y, 8, color.dark); y += 4; }
 
-    // ── Footer ────────────────────────────────────────────
     rect(0, 285, W, 12, color.primary);
     txt('AutoCare Platform — Professional Repair Report', W/2, 293, 8, [180,220,255], false, 'center');
 
@@ -205,7 +158,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     setStep(2);
   };
 
-  /* ── رفع الـ PDF للسيرفر ─────────────────────────────── */
   const submitReport = async () => {
     if (!pdfBlob) { setToast({ type:'error', text:'يرجى توليد الـ PDF أولاً' }); return; }
     try {
@@ -242,7 +194,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
         </div>
       </div>
 
-      {/* Step indicator */}
       <div className="rpt-steps">
         {[['1','تعبئة البيانات'],['2','معاينة الـ PDF'],['3','تم الإرسال']].map(([n,l],i)=>(
           <div key={n} className={`rpt-step ${step >= Number(n) ? 'rpt-step-done' : ''} ${step === Number(n) ? 'rpt-step-active' : ''}`}>
@@ -253,7 +204,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
         ))}
       </div>
 
-      {/* ── STEP 1: Form ── */}
       {step === 1 && (
         <div className="card-glass" style={{ maxWidth:680 }}>
           <div className="form-grid">
@@ -320,7 +270,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
                 style={{ resize:'vertical', paddingTop:'.75rem', paddingRight:'.9rem' }}/>
             </div>
 
-            {/* السعر الكلي */}
             <div className="fg full">
               <div className="total-box">
                 <span style={{ fontSize:'.95rem', color:'rgba(255,255,255,.55)' }}>إجمالي الفاتورة</span>
@@ -337,7 +286,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
         </div>
       )}
 
-      {/* ── STEP 2: Preview ── */}
       {step === 2 && pdfUrl && (
         <div style={{ maxWidth:680 }}>
           <div className="card-glass" style={{ marginBottom:'1rem' }}>
@@ -370,9 +318,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
   );
 };
 
-/* ══════════════════════════════════════════════════════════════════
-   CSS الجديد — أضفه داخل <style> في MechanicDashboard
-   ══════════════════════════════════════════════════════════════════ */
 const REPORT_CSS = `
   /* Steps */
   .rpt-steps{display:flex;align-items:center;margin-bottom:1.8rem;gap:0}

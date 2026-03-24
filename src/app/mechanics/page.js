@@ -79,7 +79,6 @@ const Modal = ({ open, onClose, title, children }) => {
   );
 };
 
-/* ════════════ 1 — Overview ════════════ */
 const OverviewPage = ({ api, user, setToast }) => {
   const [reviews, setReviews]       = useState(null);
   const [location, setLocation]     = useState(null);
@@ -171,7 +170,6 @@ const OverviewPage = ({ api, user, setToast }) => {
   );
 };
 
-/* ════════════ 2 — Profile ════════════ */
 const ProfilePage = ({ api, user, onUpdate, setToast }) => {
   const [form, setForm] = useState({ username:user?.username||'', fullName:user?.fullName||'', email:user?.email||'', bio:user?.profileData?.bio||'', phone:user?.profileData?.phone||'' });
   const [loading, setLoading] = useState(false);
@@ -202,7 +200,6 @@ const ProfilePage = ({ api, user, onUpdate, setToast }) => {
   );
 };
 
-/* ════════════ 3 — Location ════════════ */
 const LocationPage = ({ api, setToast }) => {
   const [location, setLocation]     = useState(null);
   const [requests, setRequests]     = useState([]);
@@ -269,7 +266,6 @@ const LocationPage = ({ api, setToast }) => {
   );
 };
 
-/* ════════════ 4 — Notifications ════════════ */
 const NotificationsPage = ({ api, setToast, onRead }) => {
   const [notifs, setNotifs]   = useState([]);
   const [loading, setLoading] = useState(true);
@@ -305,7 +301,6 @@ const NotificationsPage = ({ api, setToast, onRead }) => {
   );
 };
 
-/* ════════════ 5 — Reviews ════════════ */
 const ReviewsPage = ({ api, setToast }) => {
   const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
@@ -331,7 +326,6 @@ const ReviewsPage = ({ api, setToast }) => {
   );
 };
 
-/* ════════════ 6 — Breakdowns ════════════ */
 const BreakdownsPage = ({ api, setToast, onReport }) => {
   const [breakdowns, setBreakdowns] = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -504,7 +498,6 @@ const BreakdownsPage = ({ api, setToast, onReport }) => {
                     )}
 
                     <div className="bd-actions">
-                      {/* ── تقديم اقتراح ── */}
                       {b.status==='pending' && !hasMyProp && (
                         <button className="btn-accept" onClick={()=>openProposalModal(b)}>💬 تقديم اقتراح</button>
                       )}
@@ -514,7 +507,6 @@ const BreakdownsPage = ({ api, setToast, onReport }) => {
                       {b.status==='pending' && hasMyProp && mp.status==='rejected' && (
                         <button className="btn-accept" onClick={()=>openProposalModal(b)}>🔄 تقديم اقتراح جديد</button>
                       )}
-                      {/* ── زر رفع التقرير — يظهر فقط للـ inProgress ── */}
                       {b.status==='inProgress' && (
                         <button className="btn-report" onClick={e=>{ e.stopPropagation(); onReport(b); }}>
                           📄 رفع تقرير الإصلاح
@@ -561,7 +553,6 @@ const BreakdownsPage = ({ api, setToast, onReport }) => {
   );
 };
 
-/* ════════════ 7 — My Proposals ════════════ */
 const MyProposalsPage = ({ api, setToast, onReport }) => {
   const [proposals, setProposals] = useState([]);
   const [loading, setLoading]     = useState(true);
@@ -640,7 +631,6 @@ const MyProposalsPage = ({ api, setToast, onReport }) => {
                       {withdrawing===p._id?<Spin size={13}/>:'↩️'} سحب
                     </button>
                   )}
-                  {/* ── زر رفع التقرير من صفحة الاقتراحات ── */}
                   {p.status==='accepted' && bd.status==='inProgress' && (
                     <button className="btn-report" onClick={()=>onReport(bd)}>
                       📄 رفع تقرير الإصلاح
@@ -659,7 +649,6 @@ const MyProposalsPage = ({ api, setToast, onReport }) => {
   );
 };
 
-/* ════════════ 8 — Report Page ════════════ */
 const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
   const [step, setStep]           = useState(1);
   const [submitting, setSubmitting] = useState(false);
@@ -695,14 +684,12 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     const txt  = (t,x,yy,sz,c,bold=false,align='left')=>{ doc.setFont('helvetica',bold?'bold':'normal'); doc.setFontSize(sz); doc.setTextColor(...c); doc.text(String(t),x,yy,{align}); };
     const line = (x1,y1,x2,y2,c,w=0.3)=>{ doc.setDrawColor(...c); doc.setLineWidth(w); doc.line(x1,y1,x2,y2); };
 
-    // Header
     rect(0,0,W,38,color.primary);
     txt('Repair Report',W/2,15,20,color.white,true,'center');
     txt('AutoCare Platform',W/2,23,9,[180,220,255],false,'center');
     txt(`Date: ${new Date().toLocaleDateString('en-GB')}`,W-margin,32,8,[200,230,255],false,'right');
     y=48;
 
-    // Car info
     const car=breakdown.carInfo||{};
     rect(margin,y,W-margin*2,22,color.light);
     doc.setDrawColor(...color.primary); doc.setLineWidth(0.4); doc.rect(margin,y,W-margin*2,22);
@@ -712,21 +699,18 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     txt(`Fuel: ${car.fuelType||'-'}   Transmission: ${car.transmission||'-'}   KM: ${car.mileage?.toLocaleString()||'-'}`,margin+6,y+18,8,color.gray);
     y+=28;
 
-    // Problem
     txt('Problem',margin,y,11,color.dark,true);
     line(margin,y+2,W-margin,y+2,color.primary,0.4); y+=8;
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...color.gray);
     const titleLines=doc.splitTextToSize(breakdown.title||'-',W-margin*2);
     doc.text(titleLines,margin,y); y+=titleLines.length*5+4;
 
-    // Solution
     txt('Solution Summary',margin,y,11,color.dark,true);
     line(margin,y+2,W-margin,y+2,color.green,0.4); y+=8;
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...color.gray);
     const solLines=doc.splitTextToSize(form.solutionSummary||'-',W-margin*2);
     doc.text(solLines,margin,y); y+=solLines.length*5+6;
 
-    // Spare parts table
     const validParts=form.spareParts.filter(p=>p.name.trim());
     if (validParts.length>0) {
       txt('Spare Parts',margin,y,11,color.dark,true);
@@ -738,13 +722,11 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
       rect(margin,y,W-margin*2,7,color.light); txt('Parts Subtotal',cols.name+2,y+5,8,color.dark,true); txt(`${totalParts.toFixed(2)} ${form.currency}`,cols.total+2,y+5,8,color.dark,true); y+=10;
     }
 
-    // Final price
     rect(margin,y,W-margin*2,16,color.primary);
     txt('Total Price',margin+6,y+10,12,color.white,true);
     txt(`${grandTotal.toFixed(2)} ${form.currency}`,W-margin-4,y+10,14,color.amber,true,'right');
     y+=22;
 
-    // Notes
     if (form.mechanicNotes.trim()) {
       txt('Mechanic Notes',margin,y,11,color.dark,true);
       line(margin,y+2,W-margin,y+2,color.gray,0.3); y+=8;
@@ -753,7 +735,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
       doc.text(noteLines,margin,y); y+=noteLines.length*5+6;
     }
 
-    // Footer
     rect(0,285,W,12,color.primary);
     txt('AutoCare Platform — Professional Repair Report',W/2,293,8,[180,220,255],false,'center');
 
@@ -791,7 +772,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
         </div>
       </div>
 
-      {/* Step indicator */}
       <div className="rpt-steps">
         {[['1','تعبئة البيانات'],['2','معاينة الـ PDF'],['3','تم الإرسال']].map(([n,l],i)=>(
           <div key={n} className={`rpt-step ${step>=Number(n)?'rpt-step-done':''} ${step===Number(n)?'rpt-step-active':''}`}>
@@ -877,7 +857,6 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
   );
 };
 
-/* ════════════ MAIN APP ════════════ */
 export default function MechanicDashboard() {
   const [accessToken] = useState(() => (typeof window!=='undefined'?localStorage.getItem('accessToken'):'')||'');
   const [user, setUser]               = useState(null);
@@ -885,7 +864,6 @@ export default function MechanicDashboard() {
   const [toast, setToastSt]           = useState({ type:'', text:'' });
   const [unread, setUnread]           = useState(0);
   const [mounted, setMounted]         = useState(false);
-  // ── state للـ report ──
   const [reportBreakdown, setReportBreakdown] = useState(null);
 
   const api = useApi(accessToken);
@@ -899,7 +877,6 @@ export default function MechanicDashboard() {
       .catch(()=>{});
   }, []);
 
-  // ── handler فتح صفحة التقرير ──
   const handleReport = (breakdown) => {
     setReportBreakdown(breakdown);
     setPage('report');
@@ -923,7 +900,6 @@ export default function MechanicDashboard() {
   );
 
   const renderPage = () => {
-    // ── صفحة التقرير لها أولوية ──
     if (page==='report' && reportBreakdown)
       return <ReportPage api={api} accessToken={accessToken} breakdown={reportBreakdown} setToast={setToast} onDone={()=>{ setPage('breakdowns'); setReportBreakdown(null); }}/>;
     if (page==='overview')      return <OverviewPage      api={api} user={user} setToast={setToast}/>;
@@ -937,7 +913,7 @@ export default function MechanicDashboard() {
 
   const handleLogout = () => {
   localStorage.removeItem('accessToken');
-  window.location.href = '/auth'; // أو أي مسار تسجيل الدخول لديك
+  window.location.href = '/auth';
 };
 
   return (
@@ -1088,7 +1064,6 @@ export default function MechanicDashboard() {
         .prop-desc{font-size:.87rem;color:rgba(255,255,255,.55);line-height:1.6;padding:.6rem .8rem;background:rgba(255,255,255,.04);border-radius:10px;margin-bottom:.5rem}
         .prop-notes{font-size:.8rem;color:rgba(255,255,255,.35);padding:.4rem .7rem;border-right:2px solid rgba(255,255,255,.12)}
 
-        /* ══ Report Page ══ */
         .rpt-steps{display:flex;align-items:center;margin-bottom:1.8rem;gap:0}
         .rpt-step{display:flex;flex-direction:column;align-items:center;position:relative;flex:1}
         .rpt-step-num{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:rgba(255,255,255,.35);transition:all .3s;z-index:1}

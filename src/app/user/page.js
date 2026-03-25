@@ -1,7 +1,8 @@
 'use client'
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API_BASE = 'http://localhost:3001/api/users';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE =`${API_BASE_URL}/api/users`;
 
 const useApi = (accessToken) =>
   useCallback(async (path, options = {}) => {

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API_BASE = 'http://localhost:3001/api/admin';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE = `${API_BASE_URL}/api/admin`;
 
 const useApi = (accessToken) =>
   useCallback(async (path, options = {}) => {
@@ -601,7 +602,7 @@ const BreakdownsPage = ({ api, setToast }) => {
                 {isOpen && b.photos?.length > 0 && (
                   <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap', marginBottom: '.8rem' }}>
                     {b.photos.map((p, i) => (
-                      <img key={i} src={`http://localhost:3001${p.url}`} alt={`photo-${i}`}
+                      <img key={i} src={`${API_BASE_URL}${p.url}`} alt={`photo-${i}`}
                         style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 9, border: '1px solid rgba(255,255,255,.1)' }} />
                     ))}
                   </div>

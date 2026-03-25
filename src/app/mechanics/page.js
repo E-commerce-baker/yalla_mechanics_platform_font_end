@@ -1,7 +1,8 @@
 'use client'
 import React, { useState, useEffect, useCallback } from 'react';
 
-const API_MECH = 'http://localhost:3001/api/mechanics';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_MECH = `${API_BASE_URL}/api/mechanics`;
 
 const useApi = (accessToken) =>
   useCallback(async (path, options = {}) => {
@@ -752,7 +753,7 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
       fd.append('solutionSummary', form.solutionSummary);
       fd.append('finalPrice', String(grandTotal));
       fd.append('spareParts', JSON.stringify(form.spareParts.filter(p=>p.name.trim())));
-      const res=await fetch(`http://localhost:3001/api/mechanics/breakdowns/${breakdown._id}/report`,{ method:'POST', headers:{ Authorization:`Bearer ${accessToken}` }, body:fd });
+      const res=await fetch(`${API_BASE_URL}/api/mechanics/breakdowns/${breakdown._id}/report`,{ method:'POST', headers:{ Authorization:`Bearer ${accessToken}` }, body:fd });
       const data=await res.json();
       if (!res.ok||!data.success) throw new Error(data.error||'فشل الرفع');
       setToast({ type:'success', text:'✅ تم إرسال التقرير للعميل! تم إغلاق الطلب.' });

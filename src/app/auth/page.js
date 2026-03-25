@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-
-const API_URL = 'http://localhost:3001/api/auth';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_URL = `${API_BASE_URL}/api/auth`;
 
 const ROLES = [
   { value: 'user',     label: '👤 مستخدم عادي' },

@@ -1,3 +1,5 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 const ReportViewPage = ({ api, breakdown, setToast, onBack }) => {
   const [report, setReport]         = useState(null);
   const [loading, setLoading]       = useState(true);
@@ -33,7 +35,7 @@ const ReportViewPage = ({ api, breakdown, setToast, onBack }) => {
   };
 
   const pdfUrl = report?.reportPdf?.path
-    ? `http://localhost:3001${report.reportPdf.path}`
+    ? `${API_BASE_URL}${report.reportPdf.path}`
     : null;
 
   if (loading) return <div className="center-msg"><span style={{ display:'inline-block',width:22,height:22,border:'2px solid rgba(255,255,255,.2)',borderTopColor:'#fff',borderRadius:'50%',animation:'rot .6s linear infinite'}}/><span>جاري التحميل...</span></div>;

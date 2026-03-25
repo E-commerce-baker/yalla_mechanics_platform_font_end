@@ -1,3 +1,5 @@
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
 const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
   const [step, setStep]         = useState(1); 
   const [submitting, setSubmitting] = useState(false);
@@ -169,7 +171,7 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
       fd.append('spareParts', JSON.stringify(form.spareParts.filter(p=>p.name.trim())));
 
       const res = await fetch(
-        `http://localhost:3001/api/mechanics/breakdowns/${breakdown._id}/report`,
+        `${API_BASE_URL}/api/mechanics/breakdowns/${breakdown._id}/report`,
         { method:'POST', headers:{ Authorization:`Bearer ${accessToken}` }, body: fd }
       );
       const data = await res.json();

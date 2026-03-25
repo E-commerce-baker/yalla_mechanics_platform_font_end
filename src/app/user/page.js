@@ -1,5 +1,6 @@
 'use client'
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAccessToken } from '../useAccessToken';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const API_BASE =`${API_BASE_URL}/api/users`;
@@ -456,8 +457,9 @@ const BreakdownProposalsPage = ({ api, breakdown, setToast, onBack, onAccepted }
   );
 };
 
+
 export default function UserDashboard() {
-  const [accessToken] = useState(()=>localStorage.getItem('accessToken')||'');
+const accessToken = useAccessToken();
   const [user, setUser]       = useState(null);
   const [page, setPage]       = useState('my-breakdowns');
   const [subPage, setSubPage] = useState(null);

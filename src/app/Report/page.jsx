@@ -1,3 +1,6 @@
+'use client'
+import { useState } from "react";
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
@@ -74,7 +77,7 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     doc.rect(margin, y, W - margin*2, 22);
     rect(margin, y, 3, 22, color.primary);
 
-    const car = breakdown.carInfo || {};
+    const car = breakdown?.carInfo || {};
     txt('Vehicle Information', margin + 6, y + 6, 10, color.dark, true);
     txt(`${car.brand || '-'} ${car.model || ''} (${car.year || '-'})`, margin + 6, y + 12, 9, color.gray);
     txt(`Fuel: ${car.fuelType || '-'}   Transmission: ${car.transmission || '-'}   KM: ${car.mileage?.toLocaleString() || '-'}`, margin + 6, y + 18, 8, color.gray);
@@ -84,7 +87,7 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     line(margin, y+2, W-margin, y+2, color.primary, 0.4);
     y += 8;
     doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(...color.gray);
-    const titleLines = doc.splitTextToSize(breakdown.title || '-', W - margin*2);
+    const titleLines = doc.splitTextToSize(breakdown?.title || '-', W - margin*2);
     doc.text(titleLines, margin, y);
     y += titleLines.length * 5 + 4;
 
@@ -141,7 +144,7 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
       y += noteLines.length * 5 + 6;
     }
 
-    const user = breakdown.assignedMechanicInfo || {};
+    const user = breakdown?.assignedMechanicInfo || {};
     if (y < 240) y = 240;
     line(margin, y, W-margin, y, color.light, 0.4);
     y += 6;
@@ -165,13 +168,13 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     try {
       setSubmitting(true);
       const fd = new FormData();
-      fd.append('reportPdf', pdfBlob, `report_${breakdown._id}.pdf`);
+      fd.append('reportPdf', pdfBlob, `report_${breakdown?._id}.pdf`);
       fd.append('solutionSummary', form.solutionSummary);
       fd.append('finalPrice', String(grandTotal));
       fd.append('spareParts', JSON.stringify(form.spareParts.filter(p=>p.name.trim())));
 
       const res = await fetch(
-        `${API_BASE_URL}/api/mechanics/breakdowns/${breakdown._id}/report`,
+        `${API_BASE_URL}/api/mechanics/breakdowns/${breakdown?._id}/report`,
         { method:'POST', headers:{ Authorization:`Bearer ${accessToken}` }, body: fd }
       );
       const data = await res.json();
@@ -185,14 +188,14 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     } finally { setSubmitting(false); }
   };
 
-  const car = breakdown.carInfo || {};
+  const car = breakdown?.carInfo || {};
 
   return (
     <div className="page">
       <div className="page-hdr">
         <div className="page-title">📄 تقرير الإصلاح</div>
         <div style={{ background:'rgba(255,255,255,.06)', borderRadius:10, padding:'.4rem .9rem', fontSize:'.85rem', color:'rgba(255,255,255,.55)', marginTop:'.5rem', display:'inline-flex', alignItems:'center', gap:'.5rem' }}>
-          🚗 {car.brand} {car.model} {car.year && `(${car.year})`} — {breakdown.title}
+          🚗 {car.brand} {car.model} {car.year && `(${car.year})`} — {breakdown?.title}
         </div>
       </div>
 
@@ -298,7 +301,7 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
             <button className="btn-outline-sm" style={{ flex:1, justifyContent:'center', padding:'.8rem' }} onClick={()=>setStep(1)}>
               ✏️ تعديل البيانات
             </button>
-            <a href={pdfUrl} download={`repair-report-${breakdown._id}.pdf`} className="btn-outline-sm" style={{ flex:1, justifyContent:'center', padding:'.8rem', textDecoration:'none', textAlign:'center' }}>
+            <a href={pdfUrl} download={`repair-report-${breakdown?._id}.pdf`} className="btn-outline-sm" style={{ flex:1, justifyContent:'center', padding:'.8rem', textDecoration:'none', textAlign:'center' }}>
               ⬇️ تحميل محلياً
             </a>
             <button className="btn-primary" style={{ flex:2 }} disabled={submitting} onClick={submitReport}>
@@ -348,4 +351,5 @@ const REPORT_CSS = `
   .btn-report:hover{background:rgba(167,139,250,.22);border-color:rgba(167,139,250,.5)}
 `;
 
-export { ReportPage, REPORT_CSS };
+export default ReportPage;
+export { REPORT_CSS };

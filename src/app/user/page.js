@@ -969,6 +969,7 @@ const PostBreakdownPage = ({ accessToken, setToast, onDone }) => {
   );
 };
 
+
 const MyBreakdownsPage = ({ api, setToast, onNew, onViewProposals }) => {
   const [breakdowns, setBreakdowns] = useState([]);
   const [loading, setLoading]       = useState(true);

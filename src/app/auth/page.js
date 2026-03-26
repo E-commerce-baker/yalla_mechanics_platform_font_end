@@ -271,13 +271,8 @@ export default function AuthPage() {
                   <div className="fs">سجّل نشاطك وابدأ باستقبال العملاء</div>
                 </div>
               </div>
-              <div className="lp-feat">
-                <div className="lp-feat-ico" style={{ background: 'rgba(16,185,129,.15)', color: '#6ee7b7' }}>🛡️</div>
-                <div className="lp-feat-text">
-                  <div className="ft">مدير النظام</div>
-                  <div className="fs">إدارة كاملة للمنصة والمستخدمين</div>
-                </div>
-              </div>
+              
+              
             </div>
           </div>
         </div>

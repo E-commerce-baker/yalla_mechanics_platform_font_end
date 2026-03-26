@@ -271,7 +271,7 @@ export default function AuthPage() {
 
             <div className="tabs">
               <button className={`tab ${isLogin ? 'on' : ''}`}  onClick={() => switchView(true)}>تسجيل الدخول</button>
-              <button className={`tab ${!isLogin ? 'on' : ''}`} onClick={() => switchView(false)}>حساب جديد</button>
+              <button className={`tab ${!isLogin ? 'on' : ''}`} onClick={() => switchView(false)}>انشاء حساب</button>
             </div>
 
             {message.text && (
@@ -287,7 +287,7 @@ export default function AuthPage() {
                   <div className="fg">
                     <label className="lbl">الاسم الثلاثي</label>
                     <div className="iw"><span className="iico">👤</span>
-                      <input className="inp" type="text" placeholder="الاسم الكامل" required
+                      <input className="inp" type="text" placeholder="الاسم الثلاثي" required
                         value={formData.fullName} onChange={field('fullName')} />
                     </div>
                   </div>

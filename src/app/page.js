@@ -589,7 +589,6 @@ export default function HomePage() {
             <span className="fc-icon">🔧</span>
             <div className="fc-text">
               <span className="fc-label">ميكانيكيون متاحون الآن</span>
-              <span className="fc-val">+340 ميكانيكي</span>
             </div>
           </div>
           <div className="float-card fc3">
@@ -629,27 +628,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* STATS */}
-      <section className="stats-section" ref={statsRef}>
-        <div className="stats-grid">
-          <div className="stat-item">
-            <div className="stat-num">{counters.mechanics.toLocaleString("ar")}<span className="stat-suffix">+</span></div>
-            <div className="stat-label">ميكانيكي معتمد</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-num">{(counters.users / 1000).toFixed(counters.users > 9000 ? 0 : 1)}K<span className="stat-suffix">+</span></div>
-            <div className="stat-label">مستخدم نشط</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-num">{counters.cities}<span className="stat-suffix">+</span></div>
-            <div className="stat-label">مدينة مغطاة</div>
-          </div>
-          <div className="stat-item">
-            <div className="stat-num">{(counters.reviews / 1000).toFixed(counters.reviews > 7000 ? 1 : 1)}K<span className="stat-suffix">+</span></div>
-            <div className="stat-label">تقييم حقيقي</div>
-          </div>
-        </div>
-      </section>
+
 
       {/* FEATURES */}
       <section className="features-section" id="features">

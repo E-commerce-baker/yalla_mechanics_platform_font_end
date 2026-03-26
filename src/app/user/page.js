@@ -56,10 +56,82 @@ const ProfilePage = ({ api, initialUser, onUpdate, setToast }) => {
   const [form, setForm] = useState({ username:initialUser?.username||'', fullName:initialUser?.fullName||'', email:initialUser?.email||'', bio:initialUser?.profileData?.bio||'', phone:initialUser?.profileData?.phone||'' });
   const [loading, setLoading] = useState(false);
   const handleSubmit = async e => {
-    e.preventDefault();
-    try { setLoading(true); const res = await api('/profile',{ method:'PUT', body:JSON.stringify({ username:form.username, fullName:form.fullName, email:form.email, profileData:{ bio:form.bio, phone:form.phone } }) }); onUpdate(res.data); setToast({ type:'success', text:'تم تحديث الملف الشخصي!' }); }
-    catch(err){ setToast({ type:'error', text:err.message }); } finally { setLoading(false); }
-  };
+  e.preventDefault();
+
+  // ✅ تحقق من التاريخ
+  if (form.problemStarted) {
+    const selectedDate = new Date(form.problemStarted);
+    const today = new Date();
+
+    // إزالة الوقت للمقارنة فقط بالتاريخ
+    today.setHours(0,0,0,0);
+
+    // ❌ إذا التاريخ في المستقبل
+    if (selectedDate > today) {
+      setToast({ type: 'error', text: '❌ لا يمكن اختيار تاريخ في المستقبل' });
+      return;
+    }
+
+    // ❌ إذا التاريخ أقدم من سنة السيارة
+    if (form.carYear && selectedDate.getFullYear() < Number(form.carYear)) {
+      setToast({ type: 'error', text: '❌ تاريخ المشكلة لا يمكن أن يكون قبل سنة صنع السيارة' });
+      return;
+    }
+  }
+
+  if(!form.lat || !form.lng){
+    setToast({type:'error',text:'يرجى تحديد الموقع الجغرافي'});
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const fd = new FormData();
+    fd.append('title',form.title);
+    fd.append('description',form.description);
+
+    fd.append('carInfo',JSON.stringify({
+      brand:form.carBrand,
+      model:form.carModel,
+      year:Number(form.carYear),
+      fuelType:form.fuelType,
+      transmission:form.transmission,
+      mileage:Number(form.mileage)
+    }));
+
+    fd.append('problemDetails',JSON.stringify({
+      startedAt:form.problemStarted,
+      isRecurring:form.isRecurring,
+      warningLights:form.warningLights,
+      carRunning:form.carRunning
+    }));
+
+    fd.append('location',JSON.stringify({
+      lat:Number(form.lat),
+      lng:Number(form.lng),
+      note:form.locationNote
+    }));
+
+    images.forEach(img=>fd.append('photos',img.file));
+
+    const res = await fetch(`${API_BASE}/breakdowns`,{
+      method:'POST',
+      headers:{ Authorization:`Bearer ${accessToken}` },
+      body:fd
+    });
+
+    const data = await res.json();
+    if(!res.ok||!data.success) throw new Error(data.error||'Request failed');
+
+    setToast({ type:'success', text:'تم نشر منشور العطل بنجاح! 🚗' });
+    onDone();
+
+  } catch(err){
+    setToast({type:'error',text:err.message});
+  } finally {
+    setLoading(false);
+  }
+};
   const f = k => e => setForm(p=>({...p,[k]:e.target.value}));
   return (
     <div className="page">
@@ -247,8 +319,24 @@ const PostBreakdownPage = ({ accessToken, setToast, onDone }) => {
             <div className="form-grid">
               <div className="fg full"><label className="lbl">عنوان المشكلة *</label><div className="inp-wrap"><span className="ico">📝</span><input className="inp" value={form.title} onChange={f('title')} placeholder="مثلاً: صوت غريب من المحرك" required maxLength={120}/></div></div>
               <div className="fg full"><label className="lbl">وصف المشكلة * ({form.description.length}/1000)</label><textarea className="inp" rows={5} required maxLength={1000} value={form.description} onChange={f('description')} placeholder="اشرح المشكلة بالتفصيل..." style={{ resize:'vertical', paddingTop:'.75rem' }}/></div>
-              <div className="fg"><label className="lbl">متى بدأت المشكلة؟</label><div className="inp-wrap"><span className="ico">📅</span><input className="inp" type="date" value={form.problemStarted} onChange={f('problemStarted')}/></div></div>
-              <div className="fg">
+<div className="fg">
+  <label className="lbl">متى بدأت المشكلة؟</label>
+  <div className="inp-wrap">
+    <span className="ico">📅</span>
+    <input
+      className="inp"
+      type="date"
+      value={form.problemStarted}
+      onChange={f('problemStarted')}
+      max={new Date().toISOString().split("T")[0]}
+      min={
+        form.carYear
+          ? `${form.carYear}-01-01`
+          : undefined
+      }
+    />
+  </div>
+</div>              <div className="fg">
                 <div className="toggle-group">
                   <label className="toggle-row"><input type="checkbox" className="toggle-cb" checked={form.isRecurring} onChange={fb('isRecurring')}/><div className="toggle-track"><div className="toggle-thumb"/></div><span className="toggle-lbl">المشكلة تتكرر</span></label>
                   <label className="toggle-row"><input type="checkbox" className="toggle-cb" checked={form.warningLights} onChange={fb('warningLights')}/><div className="toggle-track"><div className="toggle-thumb"/></div><span className="toggle-lbl">لمبة تحذير ظهرت</span></label>

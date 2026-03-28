@@ -52,86 +52,97 @@ const StatusBadge = ({ status }) => {
   return <span style={{ fontSize:'.72rem', fontWeight:700, padding:'.2rem .6rem', borderRadius:20, background:s.bg, color:s.color, border:`1px solid ${s.color}33` }}>{s.icon} {s.label}</span>;
 };
 
+/* ─── Mechanic Detail Modal ─── */
+const MechanicDetailModal = ({ mechanic, onClose }) => {
+  if (!mechanic) return null;
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,.78)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem' }} onClick={onClose}>
+      <div style={{ background:'#0f1117', border:'1px solid rgba(255,255,255,.12)', borderRadius:22, padding:'2rem', width:'100%', maxWidth:440, animation:'up .25s ease' }} onClick={e=>e.stopPropagation()}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.6rem' }}>
+          <div style={{ fontSize:'1.1rem', fontWeight:800, color:'#fff' }}>معلومات الميكانيكي</div>
+          <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,.4)', fontSize:'1.3rem', cursor:'pointer' }}>✕</button>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'1rem', marginBottom:'1.5rem', paddingBottom:'1.2rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
+          <div style={{ width:60, height:60, background:'linear-gradient(135deg,#0ea5e9,#6366f1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem', flexShrink:0 }}>🔧</div>
+          <div>
+            <div style={{ fontSize:'1.1rem', fontWeight:800, color:'#fff' }}>{mechanic.fullName}</div>
+            <div style={{ fontSize:'.82rem', color:'rgba(255,255,255,.38)', marginTop:'.2rem' }}>@{mechanic.username}</div>
+          </div>
+        </div>
+        <div style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
+          {mechanic.profileData?.phone && (
+            <div style={{ display:'flex', alignItems:'center', gap:'.7rem', padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
+              <span style={{ fontSize:'1.1rem' }}>📞</span>
+              <div>
+                <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.1rem' }}>رقم الهاتف</div>
+                <div style={{ fontSize:'.92rem', color:'#fff', fontWeight:600 }}>{mechanic.profileData.phone}</div>
+              </div>
+            </div>
+          )}
+          {mechanic.email && (
+            <div style={{ display:'flex', alignItems:'center', gap:'.7rem', padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
+              <span style={{ fontSize:'1.1rem' }}>✉️</span>
+              <div>
+                <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.1rem' }}>البريد الإلكتروني</div>
+                <div style={{ fontSize:'.9rem', color:'#fff', fontWeight:600 }}>{mechanic.email}</div>
+              </div>
+            </div>
+          )}
+          {mechanic.location && (
+            <div style={{ display:'flex', alignItems:'center', gap:'.7rem', padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
+              <span style={{ fontSize:'1.1rem' }}>📍</span>
+              <div>
+                <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.1rem' }}>{mechanic.location.businessName || 'الموقع'}</div>
+                <div style={{ fontSize:'.88rem', color:'#fff', fontWeight:600 }}>{mechanic.location.address}</div>
+              </div>
+            </div>
+          )}
+          {mechanic.profileData?.bio && (
+            <div style={{ padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
+              <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.35rem' }}>نبذة</div>
+              <div style={{ fontSize:'.88rem', color:'rgba(255,255,255,.65)', lineHeight:1.6 }}>{mechanic.profileData.bio}</div>
+            </div>
+          )}
+          {!mechanic.profileData?.phone && !mechanic.profileData?.bio && !mechanic.location && (
+            <div style={{ textAlign:'center', padding:'1.5rem', color:'rgba(255,255,255,.3)', fontSize:'.9rem' }}>لا توجد معلومات إضافية</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ─── PDF Viewer Modal ─── */
+const PdfViewerModal = ({ pdfUrl, onClose }) => {
+  if (!pdfUrl) return null;
+  return (
+    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,.85)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem' }} onClick={onClose}>
+      <div style={{ background:'#0f1117', border:'1px solid rgba(255,255,255,.12)', borderRadius:20, padding:'1.5rem', width:'100%', maxWidth:780, maxHeight:'92vh', display:'flex', flexDirection:'column', animation:'up .25s ease' }} onClick={e=>e.stopPropagation()}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
+          <div style={{ fontSize:'1rem', fontWeight:800, color:'#fff' }}>📄 تقرير الإصلاح</div>
+          <div style={{ display:'flex', gap:'.7rem' }}>
+            <a href={pdfUrl} download="repair-report.pdf" style={{ padding:'.42rem .9rem', background:'rgba(16,185,129,.12)', border:'1px solid rgba(16,185,129,.3)', borderRadius:9, color:'#6ee7b7', fontSize:'.82rem', fontWeight:700, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:'.35rem' }}>⬇️ تحميل</a>
+            <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,.4)', fontSize:'1.3rem', cursor:'pointer' }}>✕</button>
+          </div>
+        </div>
+        <iframe src={pdfUrl} width="100%" style={{ flex:1, minHeight:500, borderRadius:12, border:'1px solid rgba(255,255,255,.1)' }} title="Repair Report"/>
+      </div>
+    </div>
+  );
+};
+
 const ProfilePage = ({ api, initialUser, onUpdate, setToast }) => {
   const [form, setForm] = useState({ username:initialUser?.username||'', fullName:initialUser?.fullName||'', email:initialUser?.email||'', bio:initialUser?.profileData?.bio||'', phone:initialUser?.profileData?.phone||'' });
   const [loading, setLoading] = useState(false);
   const handleSubmit = async e => {
-  e.preventDefault();
-
-  // ✅ تحقق من التاريخ
-  if (form.problemStarted) {
-    const selectedDate = new Date(form.problemStarted);
-    const today = new Date();
-
-    // إزالة الوقت للمقارنة فقط بالتاريخ
-    today.setHours(0,0,0,0);
-
-    // ❌ إذا التاريخ في المستقبل
-    if (selectedDate > today) {
-      setToast({ type: 'error', text: '❌ لا يمكن اختيار تاريخ في المستقبل' });
-      return;
-    }
-
-    // ❌ إذا التاريخ أقدم من سنة السيارة
-    if (form.carYear && selectedDate.getFullYear() < Number(form.carYear)) {
-      setToast({ type: 'error', text: '❌ تاريخ المشكلة لا يمكن أن يكون قبل سنة صنع السيارة' });
-      return;
-    }
-  }
-
-  if(!form.lat || !form.lng){
-    setToast({type:'error',text:'يرجى تحديد الموقع الجغرافي'});
-    return;
-  }
-
-  try {
-    setLoading(true);
-    const fd = new FormData();
-    fd.append('title',form.title);
-    fd.append('description',form.description);
-
-    fd.append('carInfo',JSON.stringify({
-      brand:form.carBrand,
-      model:form.carModel,
-      year:Number(form.carYear),
-      fuelType:form.fuelType,
-      transmission:form.transmission,
-      mileage:Number(form.mileage)
-    }));
-
-    fd.append('problemDetails',JSON.stringify({
-      startedAt:form.problemStarted,
-      isRecurring:form.isRecurring,
-      warningLights:form.warningLights,
-      carRunning:form.carRunning
-    }));
-
-    fd.append('location',JSON.stringify({
-      lat:Number(form.lat),
-      lng:Number(form.lng),
-      note:form.locationNote
-    }));
-
-    images.forEach(img=>fd.append('photos',img.file));
-
-    const res = await fetch(`${API_BASE}/breakdowns`,{
-      method:'POST',
-      headers:{ Authorization:`Bearer ${accessToken}` },
-      body:fd
-    });
-
-    const data = await res.json();
-    if(!res.ok||!data.success) throw new Error(data.error||'Request failed');
-
-    setToast({ type:'success', text:'تم نشر منشور العطل بنجاح! 🚗' });
-    onDone();
-
-  } catch(err){
-    setToast({type:'error',text:err.message});
-  } finally {
-    setLoading(false);
-  }
-};
+    e.preventDefault();
+    try {
+      setLoading(true);
+      const res = await api('/profile', { method:'PUT', body:JSON.stringify({ username:form.username, fullName:form.fullName, email:form.email, profileData:{ bio:form.bio, phone:form.phone } }) });
+      onUpdate(res.data);
+      setToast({ type:'success', text:'تم تحديث الملف الشخصي!' });
+    } catch(err){ setToast({ type:'error', text:err.message }); } finally { setLoading(false); }
+  };
   const f = k => e => setForm(p=>({...p,[k]:e.target.value}));
   return (
     <div className="page">
@@ -154,31 +165,59 @@ const ProfilePage = ({ api, initialUser, onUpdate, setToast }) => {
   );
 };
 
-const MechanicsPage = ({ api, setToast, onSelectMechanic }) => {
+/* ─── Mechanics Page — view only, click to see details ─── */
+const MechanicsPage = ({ api, setToast }) => {
   const [mechanics, setMechanics] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
-  useEffect(() => { api('/mechanics').then(r=>setMechanics(r.data)).catch(err=>setToast({type:'error',text:err.message})).finally(()=>setLoading(false)); }, []);
-  const filtered = mechanics.filter(m=>m.fullName.toLowerCase().includes(search.toLowerCase())||m.username.toLowerCase().includes(search.toLowerCase()));
+  const [selected, setSelected]   = useState(null);
+
+  useEffect(() => {
+    api('/mechanics')
+      .then(r => setMechanics(r.data))
+      .catch(err => setToast({ type:'error', text:err.message }))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filtered = mechanics.filter(m =>
+    m.fullName.toLowerCase().includes(search.toLowerCase()) ||
+    m.username.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="page">
-      <div className="page-hdr"><div className="page-title">الميكانيكيون</div><div className="page-sub">{mechanics.length} ميكانيكي متاح</div></div>
-      <div className="inp-wrap" style={{ marginBottom:'1.2rem' }}><span className="ico">🔍</span><input className="inp" placeholder="ابحث..." value={search} onChange={e=>setSearch(e.target.value)}/></div>
+      <div className="page-hdr">
+        <div className="page-title">الميكانيكيون 🔧</div>
+        <div className="page-sub">{mechanics.length} ميكانيكي متاح — اضغط على الكارد لعرض المعلومات</div>
+      </div>
+      <div className="inp-wrap" style={{ marginBottom:'1.2rem' }}>
+        <span className="ico">🔍</span>
+        <input className="inp" placeholder="ابحث باسم الميكانيكي..." value={search} onChange={e=>setSearch(e.target.value)}/>
+      </div>
       {loading ? <div className="center-msg"><Spin/> جاري التحميل...</div>
         : filtered.length===0 ? <div className="center-msg">لا توجد نتائج</div>
-        : <div className="mech-grid">{filtered.map(m=>(
-          <div key={m._id} className="mech-card">
-            <div className="mech-avatar">🔧</div>
-            <div className="mech-name">{m.fullName}</div>
-            <div className="mech-user">@{m.username}</div>
-            {m.profileData?.bio    && <div className="mech-bio">{m.profileData.bio}</div>}
-            {m.profileData?.phone  && <div className="mech-phone">📞 {m.profileData.phone}</div>}
-            <div className="mech-actions">
-              <button className="btn-sm btn-outline" onClick={()=>onSelectMechanic(m,'reviews')}>⭐ التقييمات</button>
-              <button className="btn-sm btn-primary-sm" onClick={()=>onSelectMechanic(m,'write')}>✍️ قيّم</button>
-            </div>
+        : (
+          <div className="mech-grid">
+            {filtered.map(m => (
+              <div key={m._id} className="mech-card" onClick={() => setSelected(m)} style={{ cursor:'pointer' }}>
+                <div className="mech-avatar">🔧</div>
+                <div className="mech-name">{m.fullName}</div>
+                <div className="mech-user">@{m.username}</div>
+                {m.profileData?.bio   && <div className="mech-bio">{m.profileData.bio}</div>}
+                {m.profileData?.phone && <div className="mech-phone">📞 {m.profileData.phone}</div>}
+                {m.location && (
+                  <div style={{ marginTop:'.5rem', fontSize:'.77rem', color:'rgba(255,255,255,.35)', display:'flex', alignItems:'center', gap:'.3rem' }}>
+                    <span>📍</span><span>{m.location.businessName || m.location.address}</span>
+                  </div>
+                )}
+                <div style={{ marginTop:'1rem', padding:'.5rem', background:'rgba(14,165,233,.08)', border:'1px solid rgba(14,165,233,.18)', borderRadius:9, textAlign:'center', fontSize:'.8rem', color:'#38bdf8', fontWeight:700 }}>
+                  👁️ عرض المعلومات
+                </div>
+              </div>
+            ))}
           </div>
-        ))}</div>}
+        )}
+      <MechanicDetailModal mechanic={selected} onClose={() => setSelected(null)}/>
     </div>
   );
 };
@@ -186,8 +225,14 @@ const MechanicsPage = ({ api, setToast, onSelectMechanic }) => {
 const MechanicReviewsPage = ({ api, mechanic, setToast, onBack }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const load = useCallback(() => { setLoading(true); api(`/mechanics/${mechanic._id}/reviews`).then(r=>setReviews(r.data)).catch(err=>setToast({type:'error',text:err.message})).finally(()=>setLoading(false)); }, [api,mechanic._id]);
-  useEffect(()=>{ load(); },[load]);
+  const load = useCallback(() => {
+    setLoading(true);
+    api(`/mechanics/${mechanic._id}/reviews`)
+      .then(r => setReviews(r.data))
+      .catch(err => setToast({ type:'error', text:err.message }))
+      .finally(() => setLoading(false));
+  }, [api, mechanic._id]);
+  useEffect(() => { load(); }, [load]);
   const avg = reviews.length ? (reviews.reduce((s,r)=>s+r.rating,0)/reviews.length).toFixed(1) : null;
   return (
     <div className="page">
@@ -196,10 +241,17 @@ const MechanicReviewsPage = ({ api, mechanic, setToast, onBack }) => {
         <div className="page-title">تقييمات {mechanic.fullName}</div>
         {avg&&<div className="avg-row"><Stars value={Math.round(avg)} readonly/><span className="avg-num">{avg}/5</span><span className="rev-count">({reviews.length} تقييم)</span></div>}
       </div>
-      {loading?<div className="center-msg"><Spin/> جاري التحميل...</div>:reviews.length===0?<div className="empty-state"><div style={{fontSize:'3rem',marginBottom:'.5rem'}}>💬</div><div>لا توجد تقييمات</div></div>
+      {loading?<div className="center-msg"><Spin/> جاري التحميل...</div>
+        :reviews.length===0?<div className="empty-state"><div style={{fontSize:'3rem',marginBottom:'.5rem'}}>💬</div><div>لا توجد تقييمات</div></div>
         :<div className="reviews-list">{reviews.map(r=>(
           <div key={r._id} className="review-card">
-            <div className="review-top"><div className="reviewer-info"><div className="reviewer-avatar">👤</div><div><div className="reviewer-name">{r.userId?.fullName||'مستخدم'}</div><div className="reviewer-user">@{r.userId?.username}</div></div></div><div className="review-right"><Stars value={r.rating} readonly/><div className="review-date">{new Date(r.createdAt).toLocaleDateString('ar')}</div></div></div>
+            <div className="review-top">
+              <div className="reviewer-info">
+                <div className="reviewer-avatar">👤</div>
+                <div><div className="reviewer-name">{r.userId?.fullName||'مستخدم'}</div><div className="reviewer-user">@{r.userId?.username}</div></div>
+              </div>
+              <div className="review-right"><Stars value={r.rating} readonly/><div className="review-date">{new Date(r.createdAt).toLocaleDateString('ar')}</div></div>
+            </div>
             <div className="review-comment">{r.comment}</div>
           </div>
         ))}</div>}
@@ -207,24 +259,46 @@ const MechanicReviewsPage = ({ api, mechanic, setToast, onBack }) => {
   );
 };
 
+/* ─── Write Review — only accessible after resolved breakdown ─── */
 const WriteReviewPage = ({ api, mechanic, setToast, onBack }) => {
   const [form, setForm] = useState({ rating:0, comment:'' });
   const [loading, setLoading] = useState(false);
   const handleSubmit = async e => {
     e.preventDefault();
     if (form.rating===0){ setToast({type:'error',text:'اختر تقييماً من 1 إلى 5.'}); return; }
-    try { setLoading(true); await api('/reviews',{ method:'POST', body:JSON.stringify({ mechanicId:mechanic._id, rating:form.rating, comment:form.comment }) }); setToast({type:'success',text:'تم إرسال التقييم!'}); onBack(); }
-    catch(err){ setToast({type:'error',text:err.message}); } finally { setLoading(false); }
+    try {
+      setLoading(true);
+      await api('/reviews',{ method:'POST', body:JSON.stringify({ mechanicId:mechanic._id, rating:form.rating, comment:form.comment }) });
+      setToast({type:'success',text:'تم إرسال التقييم! ⭐'});
+      onBack();
+    } catch(err){ setToast({type:'error',text:err.message}); } finally { setLoading(false); }
   };
   return (
     <div className="page">
       <button className="btn-back" onClick={onBack}>← رجوع</button>
-      <div className="page-hdr"><div className="page-title">تقييم {mechanic.fullName}</div><div className="page-sub">شاركنا تجربتك</div></div>
+      <div className="page-hdr">
+        <div className="page-title">تقييم {mechanic.fullName} ⭐</div>
+        <div className="page-sub">شاركنا تجربتك مع هذا الميكانيكي</div>
+      </div>
+      <div style={{ background:'rgba(245,158,11,.07)', border:'1px solid rgba(245,158,11,.2)', borderRadius:14, padding:'1rem 1.2rem', marginBottom:'1.5rem', fontSize:'.88rem', color:'#fbbf24' }}>
+        🔧 أنت تقيّم الميكانيكي الذي حلّ مشكلة سيارتك
+      </div>
       <div className="card-glass" style={{ maxWidth:520 }}>
         <form onSubmit={handleSubmit} className="form-grid">
-          <div className="fg full"><label className="lbl">التقييم</label><div style={{ display:'flex', alignItems:'center', gap:'.75rem', marginTop:'.3rem' }}><Stars value={form.rating} onChange={r=>setForm(p=>({...p,rating:r}))}/>{form.rating>0&&<span style={{ color:'#f59e0b', fontWeight:700, fontSize:'1.1rem' }}>{form.rating}/5</span>}</div></div>
-          <div className="fg full"><label className="lbl">تعليقك ({form.comment.length}/1000)</label><textarea className="inp" rows={5} required maxLength={1000} value={form.comment} onChange={e=>setForm(p=>({...p,comment:e.target.value}))} placeholder="اكتب تجربتك..." style={{ resize:'vertical', paddingTop:'.75rem' }}/></div>
-          <div className="fg full"><button type="submit" className="btn-primary" disabled={loading}>{loading?<><Spin/> جاري الإرسال...</>:'🌟 إرسال التقييم'}</button></div>
+          <div className="fg full">
+            <label className="lbl">التقييم</label>
+            <div style={{ display:'flex', alignItems:'center', gap:'.75rem', marginTop:'.3rem' }}>
+              <Stars value={form.rating} onChange={r=>setForm(p=>({...p,rating:r}))}/>
+              {form.rating>0&&<span style={{ color:'#f59e0b', fontWeight:700, fontSize:'1.1rem' }}>{form.rating}/5</span>}
+            </div>
+          </div>
+          <div className="fg full">
+            <label className="lbl">تعليقك ({form.comment.length}/1000)</label>
+            <textarea className="inp" rows={5} required maxLength={1000} value={form.comment} onChange={e=>setForm(p=>({...p,comment:e.target.value}))} placeholder="اكتب تجربتك مع هذا الميكانيكي..." style={{ resize:'vertical', paddingTop:'.75rem' }}/>
+          </div>
+          <div className="fg full">
+            <button type="submit" className="btn-primary" disabled={loading}>{loading?<><Spin/> جاري الإرسال...</>:'🌟 إرسال التقييم'}</button>
+          </div>
         </form>
       </div>
     </div>
@@ -237,11 +311,18 @@ const MyReviewsPage = ({ api, setToast }) => {
   useEffect(()=>{ api('/my-reviews').then(r=>setReviews(r.data)).catch(err=>setToast({type:'error',text:err.message})).finally(()=>setLoading(false)); },[]);
   return (
     <div className="page">
-      <div className="page-hdr"><div className="page-title">تقييماتي</div><div className="page-sub">{reviews.length} تقييم</div></div>
-      {loading?<div className="center-msg"><Spin/> جاري التحميل...</div>:reviews.length===0?<div className="empty-state"><div style={{fontSize:'3rem',marginBottom:'.5rem'}}>📋</div><div>لم تقدّم أي تقييمات بعد</div></div>
+      <div className="page-hdr"><div className="page-title">تقييماتي ⭐</div><div className="page-sub">{reviews.length} تقييم قدّمته</div></div>
+      {loading?<div className="center-msg"><Spin/> جاري التحميل...</div>
+        :reviews.length===0?<div className="empty-state"><div style={{fontSize:'3rem',marginBottom:'.5rem'}}>📋</div><div>لم تقدّم أي تقييمات بعد</div><div style={{fontSize:'.82rem',marginTop:'.5rem',color:'rgba(255,255,255,.25)'}}>يمكنك تقييم الميكانيكي بعد اكتمال إصلاح سيارتك</div></div>
         :<div className="reviews-list">{reviews.map(r=>(
           <div key={r._id} className="review-card">
-            <div className="review-top"><div className="reviewer-info"><div className="mech-avatar" style={{width:42,height:42,fontSize:'1.1rem'}}>🔧</div><div><div className="reviewer-name">{r.mechanicId?.fullName||'ميكانيكي'}</div><div className="reviewer-user">@{r.mechanicId?.username}</div></div></div><div className="review-right"><Stars value={r.rating} readonly/><div className="review-date">{new Date(r.createdAt).toLocaleDateString('ar')}</div></div></div>
+            <div className="review-top">
+              <div className="reviewer-info">
+                <div className="mech-avatar" style={{width:42,height:42,fontSize:'1.1rem'}}>🔧</div>
+                <div><div className="reviewer-name">{r.mechanicId?.fullName||'ميكانيكي'}</div><div className="reviewer-user">@{r.mechanicId?.username}</div></div>
+              </div>
+              <div className="review-right"><Stars value={r.rating} readonly/><div className="review-date">{new Date(r.createdAt).toLocaleDateString('ar')}</div></div>
+            </div>
             <div className="review-comment">{r.comment}</div>
           </div>
         ))}</div>}
@@ -260,706 +341,175 @@ const PostBreakdownPage = ({ accessToken, setToast, onDone }) => {
   const [images, setImages] = useState([]);
   const [address, setAddress] = useState('');
   const [form, setForm] = useState({
-    carBrand: '',
-    carModel: '',
-    carYear: '',
-    fuelType: '',
-    transmission: '',
-    mileage: '',
-    title: '',
-    description: '',
-    problemStarted: '',
-    isRecurring: false,
-    warningLights: false,
-    carRunning: true,
-    lat: '',
-    lng: '',
-    locationNote: '',
+    carBrand:'', carModel:'', carYear:'', fuelType:'', transmission:'', mileage:'',
+    title:'', description:'', problemStarted:'', isRecurring:false, warningLights:false, carRunning:true,
+    lat:'', lng:'', locationNote:'',
   });
 
   const handleImages = e => {
     const files = Array.from(e.target.files);
-    const valid = files.filter(
-      f => f.type.startsWith('image/') && f.size <= 5 * 1024 * 1024
-    );
-
-    if (valid.length !== files.length) {
-      setToast({ type: 'error', text: 'بعض الصور تجاوزت 5MB' });
-    }
-
-    const combined = [
-      ...images,
-      ...valid.map(file => ({
-        file,
-        preview: URL.createObjectURL(file),
-      })),
-    ].slice(0, 5);
-
+    const valid = files.filter(f=>f.type.startsWith('image/')&&f.size<=5*1024*1024);
+    if (valid.length!==files.length) setToast({type:'error',text:'بعض الصور تجاوزت 5MB'});
+    const combined = [...images,...valid.map(file=>({file,preview:URL.createObjectURL(file)}))].slice(0,5);
     setImages(combined);
   };
 
-  const removeImage = idx =>
-    setImages(prev => {
-      URL.revokeObjectURL(prev[idx].preview);
-      return prev.filter((_, i) => i !== idx);
-    });
+  const removeImage = idx => setImages(prev=>{ URL.revokeObjectURL(prev[idx].preview); return prev.filter((_,i)=>i!==idx); });
 
-  const f = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
-  const fb = k => e => setForm(p => ({ ...p, [k]: e.target.checked }));
+  const f  = k => e => setForm(p=>({...p,[k]:e.target.value}));
+  const fb = k => e => setForm(p=>({...p,[k]:e.target.checked}));
 
   const fetchAddressFromCoords = async (lat, lng) => {
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-        {
-          headers: {
-            Accept: 'application/json',
-          },
-        }
-      );
-
+      const res  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,{headers:{Accept:'application/json'}});
       const data = await res.json();
-
-      if (data?.display_name) {
-        setAddress(data.display_name);
-      } else {
-        setAddress('تم تحديد الموقع');
-      }
-    } catch (err) {
-      setAddress('تم تحديد الموقع');
-    }
+      setAddress(data?.display_name || 'تم تحديد الموقع');
+    } catch { setAddress('تم تحديد الموقع'); }
   };
 
   const getLocation = () => {
-    if (!navigator.geolocation) {
-      setToast({ type: 'error', text: 'المتصفح لا يدعم تحديد الموقع' });
-      return;
-    }
-
+    if (!navigator.geolocation){ setToast({type:'error',text:'المتصفح لا يدعم تحديد الموقع'}); return; }
     setLocLoading(true);
-
     navigator.geolocation.getCurrentPosition(
       async pos => {
-        const lat = pos.coords.latitude.toFixed(6);
-        const lng = pos.coords.longitude.toFixed(6);
-
-        setForm(p => ({ ...p, lat, lng }));
-        await fetchAddressFromCoords(lat, lng);
+        const lat=pos.coords.latitude.toFixed(6), lng=pos.coords.longitude.toFixed(6);
+        setForm(p=>({...p,lat,lng}));
+        await fetchAddressFromCoords(lat,lng);
         setLocLoading(false);
       },
-      () => {
-        setToast({ type: 'error', text: 'تعذّر تحديد الموقع' });
-        setLocLoading(false);
-      }
+      ()=>{ setToast({type:'error',text:'تعذّر تحديد الموقع'}); setLocLoading(false); }
     );
   };
 
-  const handleManualLocationBlur = async () => {
-    if (form.lat && form.lng) {
-      await fetchAddressFromCoords(form.lat, form.lng);
-    }
-  };
+  const handleManualLocationBlur = async () => { if (form.lat&&form.lng) await fetchAddressFromCoords(form.lat,form.lng); };
 
   const handleSubmit = async e => {
     e.preventDefault();
-
     if (form.problemStarted) {
-      const selectedDate = new Date(form.problemStarted);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      if (isNaN(selectedDate.getTime())) {
-        setToast({ type: 'error', text: '❌ تاريخ المشكلة غير صالح' });
-        return;
-      }
-
-      if (selectedDate > today) {
-        setToast({ type: 'error', text: '❌ لا يمكن اختيار تاريخ في المستقبل' });
-        return;
-      }
-
-      if (form.carYear && selectedDate.getFullYear() < Number(form.carYear)) {
-        setToast({
-          type: 'error',
-          text: '❌ تاريخ المشكلة لا يمكن أن يكون قبل سنة صنع السيارة',
-        });
-        return;
-      }
+      const sel=new Date(form.problemStarted), today=new Date(); today.setHours(0,0,0,0);
+      if (isNaN(sel.getTime()))       { setToast({type:'error',text:'❌ تاريخ المشكلة غير صالح'}); return; }
+      if (sel>today)                  { setToast({type:'error',text:'❌ لا يمكن اختيار تاريخ في المستقبل'}); return; }
+      if (form.carYear&&sel.getFullYear()<Number(form.carYear)){ setToast({type:'error',text:'❌ تاريخ المشكلة لا يمكن أن يكون قبل سنة صنع السيارة'}); return; }
     }
-
-    if (!form.lat || !form.lng) {
-      setToast({ type: 'error', text: 'يرجى تحديد الموقع الجغرافي' });
-      return;
-    }
-
+    if (!form.lat||!form.lng){ setToast({type:'error',text:'يرجى تحديد الموقع الجغرافي'}); return; }
     try {
       setLoading(true);
-
-      const fd = new FormData();
-      fd.append('title', form.title);
-      fd.append('description', form.description);
-
-      fd.append(
-        'carInfo',
-        JSON.stringify({
-          brand: form.carBrand,
-          model: form.carModel,
-          year: Number(form.carYear),
-          fuelType: form.fuelType,
-          transmission: form.transmission,
-          mileage: Number(form.mileage),
-        })
-      );
-
-      fd.append(
-        'problemDetails',
-        JSON.stringify({
-          startedAt: form.problemStarted,
-          isRecurring: form.isRecurring,
-          warningLights: form.warningLights,
-          carRunning: form.carRunning,
-        })
-      );
-
-      fd.append(
-        'location',
-        JSON.stringify({
-          lat: Number(form.lat),
-          lng: Number(form.lng),
-          note: form.locationNote,
-          address,
-        })
-      );
-
-      images.forEach(img => fd.append('photos', img.file));
-
-      const res = await fetch(`${API_BASE}/breakdowns`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${accessToken}` },
-        body: fd,
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Request failed');
-      }
-
-      setToast({ type: 'success', text: 'تم نشر منشور العطل بنجاح! 🚗' });
+      const fd=new FormData();
+      fd.append('title',form.title);
+      fd.append('description',form.description);
+      fd.append('carInfo',JSON.stringify({brand:form.carBrand,model:form.carModel,year:Number(form.carYear),fuelType:form.fuelType,transmission:form.transmission,mileage:Number(form.mileage)}));
+      fd.append('problemDetails',JSON.stringify({startedAt:form.problemStarted,isRecurring:form.isRecurring,warningLights:form.warningLights,carRunning:form.carRunning}));
+      fd.append('location',JSON.stringify({lat:Number(form.lat),lng:Number(form.lng),note:form.locationNote,address}));
+      images.forEach(img=>fd.append('photos',img.file));
+      const res=await fetch(`${API_BASE}/breakdowns`,{method:'POST',headers:{Authorization:`Bearer ${accessToken}`},body:fd});
+      const data=await res.json();
+      if (!res.ok||!data.success) throw new Error(data.error||'Request failed');
+      setToast({type:'success',text:'تم نشر منشور العطل بنجاح! 🚗'});
       onDone();
-    } catch (err) {
-      setToast({ type: 'error', text: err.message });
-    } finally {
-      setLoading(false);
-    }
+    } catch(err){ setToast({type:'error',text:err.message}); } finally { setLoading(false); }
   };
 
-  const canNext1 =
-    form.carBrand &&
-    form.carModel &&
-    form.carYear &&
-    form.fuelType &&
-    form.transmission;
-
-  const canNext2 = form.title && form.description;
+  const canNext1 = form.carBrand&&form.carModel&&form.carYear&&form.fuelType&&form.transmission;
+  const canNext2 = form.title&&form.description;
 
   const StepDots = () => (
-    <div style={{ display: 'flex', gap: 8, marginBottom: '1.8rem', alignItems: 'center' }}>
-      {[1, 2, 3].map(s => (
+    <div style={{ display:'flex', gap:8, marginBottom:'1.8rem', alignItems:'center' }}>
+      {[1,2,3].map(s=>(
         <React.Fragment key={s}>
-          <div
-            style={{
-              width: step === s ? 32 : 10,
-              height: 10,
-              borderRadius: 99,
-              background:
-                s <= step
-                  ? 'linear-gradient(135deg,#0ea5e9,#6366f1)'
-                  : 'rgba(255,255,255,.1)',
-              transition: 'all .3s',
-              flexShrink: 0,
-            }}
-          />
-          {s < 3 && (
-            <div
-              style={{
-                flex: 1,
-                height: 1,
-                background:
-                  s < step ? 'rgba(14,165,233,.4)' : 'rgba(255,255,255,.08)',
-              }}
-            />
-          )}
+          <div style={{ width:step===s?32:10, height:10, borderRadius:99, background:s<=step?'linear-gradient(135deg,#0ea5e9,#6366f1)':'rgba(255,255,255,.1)', transition:'all .3s', flexShrink:0 }}/>
+          {s<3&&<div style={{ flex:1, height:1, background:s<step?'rgba(14,165,233,.4)':'rgba(255,255,255,.08)' }}/>}
         </React.Fragment>
       ))}
-      <span
-        style={{
-          color: 'rgba(255,255,255,.3)',
-          fontSize: '.8rem',
-          marginRight: 4,
-        }}
-      >
-        {step === 1
-          ? 'معلومات السيارة'
-          : step === 2
-          ? 'وصف المشكلة'
-          : 'الموقع الجغرافي'}
+      <span style={{ color:'rgba(255,255,255,.3)', fontSize:'.8rem', marginRight:4 }}>
+        {step===1?'معلومات السيارة':step===2?'وصف المشكلة':'الموقع الجغرافي'}
       </span>
     </div>
   );
 
   return (
     <div className="page">
-      <div className="page-hdr">
-        <div className="page-title">🚨 نشر عطل سيارة</div>
-        <div className="page-sub">أخبر الميكانيكيين بمشكلة سيارتك</div>
-      </div>
-
-      <div className="card-glass" style={{ maxWidth: 620 }}>
-        <StepDots />
-
-        <form onSubmit={step < 3 ? e => { e.preventDefault(); setStep(s => s + 1); } : handleSubmit}>
-          {step === 1 && (
+      <div className="page-hdr"><div className="page-title">🚨 نشر عطل سيارة</div><div className="page-sub">أخبر الميكانيكيين بمشكلة سيارتك</div></div>
+      <div className="card-glass" style={{ maxWidth:620 }}>
+        <StepDots/>
+        <form onSubmit={step<3?e=>{e.preventDefault();setStep(s=>s+1);}:handleSubmit}>
+          {step===1&&(
             <div className="form-grid">
-              <div className="fg">
-                <label className="lbl">الماركة *</label>
-                <div className="inp-wrap">
-                  <span className="ico">🚗</span>
-                  <select
-                    className="inp inp-select"
-                    value={form.carBrand}
-                    onChange={f('carBrand')}
-                    required
-                  >
-                    <option value="">اختر الماركة...</option>
-                    {CAR_BRANDS.map(b => (
-                      <option key={b} value={b}>
-                        {b}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="fg">
-                <label className="lbl">الموديل *</label>
-                <div className="inp-wrap">
-                  <span className="ico">🏷️</span>
-                  <input
-                    className="inp"
-                    value={form.carModel}
-                    onChange={f('carModel')}
-                    placeholder="مثلاً: كامري"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="fg">
-                <label className="lbl">سنة الصنع *</label>
-                <div className="inp-wrap">
-                  <span className="ico">📅</span>
-                  <input
-                    className="inp"
-                    type="number"
-                    min="1990"
-                    max={new Date().getFullYear()}
-                    value={form.carYear}
-                    onChange={f('carYear')}
-                    placeholder="2019"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="fg">
-                <label className="lbl">نوع الوقود *</label>
-                <div className="inp-wrap">
-                  <span className="ico">⛽</span>
-                  <select
-                    className="inp inp-select"
-                    value={form.fuelType}
-                    onChange={f('fuelType')}
-                    required
-                  >
-                    <option value="">اختر...</option>
-                    {FUEL_TYPES.map(t => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="fg">
-                <label className="lbl">ناقل الحركة *</label>
-                <div className="inp-wrap">
-                  <span className="ico">⚙️</span>
-                  <select
-                    className="inp inp-select"
-                    value={form.transmission}
-                    onChange={f('transmission')}
-                    required
-                  >
-                    <option value="">اختر...</option>
-                    {TRANS_TYPES.map(t => (
-                      <option key={t} value={t}>
-                        {t}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div className="fg">
-                <label className="lbl">الكيلومترات</label>
-                <div className="inp-wrap">
-                  <span className="ico">🔢</span>
-                  <input
-                    className="inp"
-                    type="number"
-                    min="0"
-                    value={form.mileage}
-                    onChange={f('mileage')}
-                    placeholder="85000"
-                  />
-                </div>
-              </div>
-
+              <div className="fg"><label className="lbl">الماركة *</label><div className="inp-wrap"><span className="ico">🚗</span><select className="inp inp-select" value={form.carBrand} onChange={f('carBrand')} required><option value="">اختر الماركة...</option>{CAR_BRANDS.map(b=><option key={b} value={b}>{b}</option>)}</select></div></div>
+              <div className="fg"><label className="lbl">الموديل *</label><div className="inp-wrap"><span className="ico">🏷️</span><input className="inp" value={form.carModel} onChange={f('carModel')} placeholder="مثلاً: كامري" required/></div></div>
+              <div className="fg"><label className="lbl">سنة الصنع *</label><div className="inp-wrap"><span className="ico">📅</span><input className="inp" type="number" min="1990" max={new Date().getFullYear()} value={form.carYear} onChange={f('carYear')} placeholder="2019" required/></div></div>
+              <div className="fg"><label className="lbl">نوع الوقود *</label><div className="inp-wrap"><span className="ico">⛽</span><select className="inp inp-select" value={form.fuelType} onChange={f('fuelType')} required><option value="">اختر...</option>{FUEL_TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></div></div>
+              <div className="fg"><label className="lbl">ناقل الحركة *</label><div className="inp-wrap"><span className="ico">⚙️</span><select className="inp inp-select" value={form.transmission} onChange={f('transmission')} required><option value="">اختر...</option>{TRANS_TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></div></div>
+              <div className="fg"><label className="lbl">الكيلومترات</label><div className="inp-wrap"><span className="ico">🔢</span><input className="inp" type="number" min="0" value={form.mileage} onChange={f('mileage')} placeholder="85000"/></div></div>
               <div className="fg full">
                 <label className="lbl">صور السيارة (اختياري — حتى 5 صور)</label>
                 <label className="img-upload-area" htmlFor="car-imgs">
-                  <input
-                    id="car-imgs"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    style={{ display: 'none' }}
-                    onChange={handleImages}
-                  />
-
-                  {images.length === 0 ? (
-                    <div className="img-upload-placeholder">
-                      <div style={{ fontSize: '2rem', marginBottom: '.4rem' }}>📷</div>
-                      <div
-                        style={{
-                          fontWeight: 700,
-                          color: 'rgba(255,255,255,.5)',
-                          fontSize: '.9rem',
-                        }}
-                      >
-                        اضغط لرفع الصور
-                      </div>
-                    </div>
-                  ) : (
+                  <input id="car-imgs" type="file" accept="image/*" multiple style={{display:'none'}} onChange={handleImages}/>
+                  {images.length===0?(
+                    <div className="img-upload-placeholder"><div style={{fontSize:'2rem',marginBottom:'.4rem'}}>📷</div><div style={{fontWeight:700,color:'rgba(255,255,255,.5)',fontSize:'.9rem'}}>اضغط لرفع الصور</div></div>
+                  ):(
                     <div className="img-thumbs-row">
-                      {images.map((img, i) => (
+                      {images.map((img,i)=>(
                         <div key={i} className="img-thumb-wrap">
-                          <img src={img.preview} className="img-thumb" alt="" />
-                          <button
-                            type="button"
-                            className="img-remove"
-                            onClick={e => {
-                              e.preventDefault();
-                              removeImage(i);
-                            }}
-                          >
-                            ✕
-                          </button>
+                          <img src={img.preview} className="img-thumb" alt=""/>
+                          <button type="button" className="img-remove" onClick={e=>{e.preventDefault();removeImage(i);}}>✕</button>
                         </div>
                       ))}
-                      {images.length < 5 && (
-                        <div className="img-add-more">
-                          <div style={{ fontSize: '1.4rem' }}>+</div>
-                        </div>
-                      )}
+                      {images.length<5&&<div className="img-add-more"><div style={{fontSize:'1.4rem'}}>+</div></div>}
                     </div>
                   )}
                 </label>
               </div>
-
-              <div className="fg full">
-                <button type="submit" className="btn-primary" disabled={!canNext1}>
-                  التالي: وصف المشكلة ←
-                </button>
-              </div>
+              <div className="fg full"><button type="submit" className="btn-primary" disabled={!canNext1}>التالي: وصف المشكلة ←</button></div>
             </div>
           )}
-
-          {step === 2 && (
+          {step===2&&(
             <div className="form-grid">
-              <div className="fg full">
-                <label className="lbl">عنوان المشكلة *</label>
-                <div className="inp-wrap">
-                  <span className="ico">📝</span>
-                  <input
-                    className="inp"
-                    value={form.title}
-                    onChange={f('title')}
-                    placeholder="مثلاً: صوت غريب من المحرك"
-                    required
-                    maxLength={120}
-                  />
-                </div>
-              </div>
-
-              <div className="fg full">
-                <label className="lbl">وصف المشكلة * ({form.description.length}/1000)</label>
-                <textarea
-                  className="inp"
-                  rows={5}
-                  required
-                  maxLength={1000}
-                  value={form.description}
-                  onChange={f('description')}
-                  placeholder="اشرح المشكلة بالتفصيل..."
-                  style={{ resize: 'vertical', paddingTop: '.75rem' }}
-                />
-              </div>
-
-              <div className="fg">
-                <label className="lbl">متى بدأت المشكلة؟</label>
-                <div className="inp-wrap">
-                  <span className="ico">📅</span>
-                  <input
-                    className="inp"
-                    type="date"
-                    value={form.problemStarted}
-                    onChange={f('problemStarted')}
-                    max={new Date().toISOString().split('T')[0]}
-                    min={form.carYear ? `${form.carYear}-01-01` : undefined}
-                  />
-                </div>
-              </div>
-
+              <div className="fg full"><label className="lbl">عنوان المشكلة *</label><div className="inp-wrap"><span className="ico">📝</span><input className="inp" value={form.title} onChange={f('title')} placeholder="مثلاً: صوت غريب من المحرك" required maxLength={120}/></div></div>
+              <div className="fg full"><label className="lbl">وصف المشكلة * ({form.description.length}/1000)</label><textarea className="inp" rows={5} required maxLength={1000} value={form.description} onChange={f('description')} placeholder="اشرح المشكلة بالتفصيل..." style={{resize:'vertical',paddingTop:'.75rem'}}/></div>
+              <div className="fg"><label className="lbl">متى بدأت المشكلة؟</label><div className="inp-wrap"><span className="ico">📅</span><input className="inp" type="date" value={form.problemStarted} onChange={f('problemStarted')} max={new Date().toISOString().split('T')[0]} min={form.carYear?`${form.carYear}-01-01`:undefined}/></div></div>
               <div className="fg">
                 <div className="toggle-group">
-                  <label className="toggle-row">
-                    <input
-                      type="checkbox"
-                      className="toggle-cb"
-                      checked={form.isRecurring}
-                      onChange={fb('isRecurring')}
-                    />
-                    <div className="toggle-track">
-                      <div className="toggle-thumb" />
-                    </div>
-                    <span className="toggle-lbl">المشكلة تتكرر</span>
-                  </label>
-
-                  <label className="toggle-row">
-                    <input
-                      type="checkbox"
-                      className="toggle-cb"
-                      checked={form.warningLights}
-                      onChange={fb('warningLights')}
-                    />
-                    <div className="toggle-track">
-                      <div className="toggle-thumb" />
-                    </div>
-                    <span className="toggle-lbl">لمبة تحذير ظهرت</span>
-                  </label>
-
-                  <label className="toggle-row">
-                    <input
-                      type="checkbox"
-                      className="toggle-cb"
-                      checked={form.carRunning}
-                      onChange={fb('carRunning')}
-                    />
-                    <div className="toggle-track">
-                      <div className="toggle-thumb" />
-                    </div>
-                    <span className="toggle-lbl">السيارة لا تزال تعمل</span>
-                  </label>
+                  <label className="toggle-row"><input type="checkbox" className="toggle-cb" checked={form.isRecurring} onChange={fb('isRecurring')}/><div className="toggle-track"><div className="toggle-thumb"/></div><span className="toggle-lbl">المشكلة تتكرر</span></label>
+                  <label className="toggle-row"><input type="checkbox" className="toggle-cb" checked={form.warningLights} onChange={fb('warningLights')}/><div className="toggle-track"><div className="toggle-thumb"/></div><span className="toggle-lbl">لمبة تحذير ظهرت</span></label>
+                  <label className="toggle-row"><input type="checkbox" className="toggle-cb" checked={form.carRunning} onChange={fb('carRunning')}/><div className="toggle-track"><div className="toggle-thumb"/></div><span className="toggle-lbl">السيارة لا تزال تعمل</span></label>
                 </div>
               </div>
-
-              <div className="fg full" style={{ display: 'flex', gap: '.75rem' }}>
-                <button
-                  type="button"
-                  className="btn-back"
-                  style={{ flex: 1, justifyContent: 'center' }}
-                  onClick={() => setStep(1)}
-                >
-                  → رجوع
-                </button>
-
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  style={{ flex: 2 }}
-                  disabled={!canNext2}
-                >
-                  التالي: الموقع ←
-                </button>
+              <div className="fg full" style={{display:'flex',gap:'.75rem'}}>
+                <button type="button" className="btn-back" style={{flex:1,justifyContent:'center'}} onClick={()=>setStep(1)}>→ رجوع</button>
+                <button type="submit" className="btn-primary" style={{flex:2}} disabled={!canNext2}>التالي: الموقع ←</button>
               </div>
             </div>
           )}
-
-          {step === 3 && (
+          {step===3&&(
             <div className="form-grid">
-              <div className="fg full">
-                <button
-                  type="button"
-                  className="btn-locate"
-                  onClick={getLocation}
-                  disabled={locLoading}
-                >
-                  {locLoading ? (
-                    <>
-                      <Spin /> جاري تحديد الموقع...
-                    </>
-                  ) : (
-                    '📡 تحديد موقعي الحالي تلقائياً'
-                  )}
-                </button>
-              </div>
-
-              {form.lat && form.lng && (
+              <div className="fg full"><button type="button" className="btn-locate" onClick={getLocation} disabled={locLoading}>{locLoading?<><Spin/> جاري تحديد الموقع...</>:'📡 تحديد موقعي الحالي تلقائياً'}</button></div>
+              {form.lat&&form.lng&&(
                 <div className="fg full">
-                  <div
-                    className="loc-preview"
-                    style={{ cursor: 'pointer' }}
-                    onClick={() =>
-                      window.open(
-                        `https://www.google.com/maps?q=${form.lat},${form.lng}`,
-                        '_blank'
-                      )
-                    }
-                    title="افتح الموقع على الخريطة"
-                  >
+                  <div className="loc-preview" style={{cursor:'pointer'}} onClick={()=>window.open(`https://www.google.com/maps?q=${form.lat},${form.lng}`,'_blank')}>
                     <div className="loc-pin">📍</div>
                     <div>
-                      <div
-                        style={{
-                          color: '#6ee7b7',
-                          fontWeight: 700,
-                          fontSize: '.88rem',
-                        }}
-                      >
-                        تم تحديد الموقع
-                      </div>
-
-                      <div
-                        style={{
-                          color: 'rgba(255,255,255,.6)',
-                          fontSize: '.85rem',
-                          marginTop: '.15rem',
-                        }}
-                      >
-                        {address || 'جاري تحميل اسم الموقع...'}
-                      </div>
-
-                      <div
-                        style={{
-                          color: 'rgba(255,255,255,.35)',
-                          fontSize: '.75rem',
-                          marginTop: '.15rem',
-                        }}
-                      >
-                        {form.lat}, {form.lng}
-                      </div>
+                      <div style={{color:'#6ee7b7',fontWeight:700,fontSize:'.88rem'}}>تم تحديد الموقع</div>
+                      <div style={{color:'rgba(255,255,255,.6)',fontSize:'.85rem',marginTop:'.15rem'}}>{address||'جاري تحميل اسم الموقع...'}</div>
+                      <div style={{color:'rgba(255,255,255,.35)',fontSize:'.75rem',marginTop:'.15rem'}}>{form.lat}, {form.lng}</div>
                     </div>
                   </div>
                 </div>
               )}
-
-              <div className="fg">
-                <label className="lbl">خط العرض</label>
-                <div className="inp-wrap">
-                  <span className="ico">↕️</span>
-                  <input
-                    className="inp"
-                    type="number"
-                    step="any"
-                    value={form.lat}
-                    onChange={f('lat')}
-                    onBlur={handleManualLocationBlur}
-                    placeholder="31.9539"
-                  />
-                </div>
-              </div>
-
-              <div className="fg">
-                <label className="lbl">خط الطول</label>
-                <div className="inp-wrap">
-                  <span className="ico">↔️</span>
-                  <input
-                    className="inp"
-                    type="number"
-                    step="any"
-                    value={form.lng}
-                    onChange={f('lng')}
-                    onBlur={handleManualLocationBlur}
-                    placeholder="35.9106"
-                  />
-                </div>
-              </div>
-
-              <div className="fg full">
-                <label className="lbl">ملاحظة الموقع</label>
-                <div className="inp-wrap">
-                  <span className="ico">🗺️</span>
-                  <input
-                    className="inp"
-                    value={form.locationNote}
-                    onChange={f('locationNote')}
-                    placeholder="أمام مجمع..."
-                  />
-                </div>
-              </div>
-
+              <div className="fg"><label className="lbl">خط العرض</label><div className="inp-wrap"><span className="ico">↕️</span><input className="inp" type="number" step="any" value={form.lat} onChange={f('lat')} onBlur={handleManualLocationBlur} placeholder="31.9539"/></div></div>
+              <div className="fg"><label className="lbl">خط الطول</label><div className="inp-wrap"><span className="ico">↔️</span><input className="inp" type="number" step="any" value={form.lng} onChange={f('lng')} onBlur={handleManualLocationBlur} placeholder="35.9106"/></div></div>
+              <div className="fg full"><label className="lbl">ملاحظة الموقع</label><div className="inp-wrap"><span className="ico">🗺️</span><input className="inp" value={form.locationNote} onChange={f('locationNote')} placeholder="أمام مجمع..."/></div></div>
               <div className="fg full">
                 <div className="summary-card">
                   <div className="summary-title">📋 ملخص المنشور</div>
-                  <div className="summary-row">
-                    <span className="sk">السيارة:</span>
-                    <span className="sv">
-                      {form.carBrand} {form.carModel} {form.carYear}
-                    </span>
-                  </div>
-                  <div className="summary-row">
-                    <span className="sk">الوقود:</span>
-                    <span className="sv">{form.fuelType}</span>
-                  </div>
-                  <div className="summary-row">
-                    <span className="sk">المشكلة:</span>
-                    <span className="sv">{form.title || '—'}</span>
-                  </div>
-                  <div className="summary-row">
-                    <span className="sk">الموقع:</span>
-                    <span className="sv">
-                      {address || (form.lat && form.lng ? `${form.lat}, ${form.lng}` : 'لم يُحدَّد')}
-                    </span>
-                  </div>
+                  <div className="summary-row"><span className="sk">السيارة:</span><span className="sv">{form.carBrand} {form.carModel} {form.carYear}</span></div>
+                  <div className="summary-row"><span className="sk">الوقود:</span><span className="sv">{form.fuelType}</span></div>
+                  <div className="summary-row"><span className="sk">المشكلة:</span><span className="sv">{form.title||'—'}</span></div>
+                  <div className="summary-row"><span className="sk">الموقع:</span><span className="sv">{address||(form.lat&&form.lng?`${form.lat}, ${form.lng}`:'لم يُحدَّد')}</span></div>
                 </div>
               </div>
-
-              <div className="fg full" style={{ display: 'flex', gap: '.75rem' }}>
-                <button
-                  type="button"
-                  className="btn-back"
-                  style={{ flex: 1, justifyContent: 'center' }}
-                  onClick={() => setStep(2)}
-                >
-                  → رجوع
-                </button>
-
-                <button
-                  type="submit"
-                  className="btn-primary"
-                  style={{ flex: 2 }}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <>
-                      <Spin /> جاري النشر...
-                    </>
-                  ) : (
-                    '🚨 نشر منشور العطل'
-                  )}
-                </button>
+              <div className="fg full" style={{display:'flex',gap:'.75rem'}}>
+                <button type="button" className="btn-back" style={{flex:1,justifyContent:'center'}} onClick={()=>setStep(2)}>→ رجوع</button>
+                <button type="submit" className="btn-primary" style={{flex:2}} disabled={loading}>{loading?<><Spin/> جاري النشر...</>:'🚨 نشر منشور العطل'}</button>
               </div>
             </div>
           )}
@@ -969,12 +519,27 @@ const PostBreakdownPage = ({ accessToken, setToast, onDone }) => {
   );
 };
 
-
-const MyBreakdownsPage = ({ api, setToast, onNew, onViewProposals }) => {
+/* ─── My Breakdowns — with PDF viewer + review button for resolved ─── */
+const MyBreakdownsPage = ({ api, accessToken, setToast, onNew, onViewProposals, onWriteReview }) => {
   const [breakdowns, setBreakdowns] = useState([]);
   const [loading, setLoading]       = useState(true);
-  const load = useCallback(()=>{ setLoading(true); api('/my-breakdowns').then(r=>setBreakdowns(r.data)).catch(err=>setToast({type:'error',text:err.message})).finally(()=>setLoading(false)); },[api]);
-  useEffect(()=>{ load(); },[load]);
+  const [pdfModal, setPdfModal]     = useState(null); // { url }
+
+  const load = useCallback(() => {
+    setLoading(true);
+    api('/my-breakdowns')
+      .then(r => setBreakdowns(r.data))
+      .catch(err => setToast({ type:'error', text:err.message }))
+      .finally(() => setLoading(false));
+  }, [api]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const openPdf = (b) => {
+    if (!b.reportPdf?.path) return;
+    const url = `${API_BASE_URL}${b.reportPdf.path}`;
+    setPdfModal({ url });
+  };
 
   return (
     <div className="page">
@@ -985,17 +550,21 @@ const MyBreakdownsPage = ({ api, setToast, onNew, onViewProposals }) => {
           <button className="btn-new" onClick={onNew}>+ نشر عطل جديد</button>
         </div>
       </div>
+
       {loading ? <div className="center-msg"><Spin/> جاري التحميل...</div>
         : breakdowns.length===0 ? (
           <div className="empty-state">
-            <div style={{ fontSize:'3.5rem', marginBottom:'.7rem' }}>🚗</div>
-            <div style={{ marginBottom:'1rem' }}>لم تنشر أي منشور بعد</div>
-            <button className="btn-primary" style={{ maxWidth:220 }} onClick={onNew}>🚨 نشر أول منشور</button>
+            <div style={{fontSize:'3.5rem',marginBottom:'.7rem'}}>🚗</div>
+            <div style={{marginBottom:'1rem'}}>لم تنشر أي منشور بعد</div>
+            <button className="btn-primary" style={{maxWidth:220}} onClick={onNew}>🚨 نشر أول منشور</button>
           </div>
         ) : (
           <div className="bd-list">
-            {breakdowns.map(b=>{
+            {breakdowns.map(b => {
               const hasProposals = (b.proposalCount||0) > 0;
+              const isResolved   = b.status === 'resolved';
+              const hasPdf       = !!b.reportPdf?.path;
+
               return (
                 <div key={b._id} className="bd-card">
                   <div className="bd-card-top">
@@ -1020,14 +589,32 @@ const MyBreakdownsPage = ({ api, setToast, onNew, onViewProposals }) => {
                       {b.assignedMechanic&&<span style={{ fontSize:'.72rem', padding:'.18rem .55rem', borderRadius:20, background:'rgba(16,185,129,.1)', color:'#6ee7b7', border:'1px solid rgba(16,185,129,.25)' }}>🔧 {b.assignedMechanic.fullName}</span>}
                     </div>
                   </div>
+
                   <div className="bd-title">{b.title}</div>
                   <div className="bd-desc">{b.description}</div>
+
+                  {/* ─── Resolved: PDF + Review ─── */}
+                  {isResolved && (
+                    <div style={{ display:'flex', gap:'.7rem', margin:'.8rem 0', flexWrap:'wrap' }}>
+                      {hasPdf && (
+                        <button className="btn-pdf" onClick={() => openPdf(b)}>
+                          📄 عرض تقرير الإصلاح
+                        </button>
+                      )}
+                      {b.assignedMechanic && (
+                        <button className="btn-review" onClick={() => onWriteReview(b.assignedMechanic)}>
+                          ⭐ تقييم الميكانيكي
+                        </button>
+                      )}
+                    </div>
+                  )}
+
                   <div className="bd-footer">
                     <div className="bd-footer-row">
-                      {b.location?.lat && <span className="bd-info-chip">📍 {Number(b.location.lat).toFixed(4)}, {Number(b.location.lng).toFixed(4)}</span>}
-                      {b.problemDetails?.warningLights   && <span className="bd-info-chip warn">⚠️ لمبة تحذير</span>}
-                      {b.problemDetails?.isRecurring     && <span className="bd-info-chip">🔁 متكررة</span>}
-                      {b.problemDetails?.carRunning===false && <span className="bd-info-chip err">🔴 واقفة</span>}
+                      {b.location?.lat                         && <span className="bd-info-chip">📍 {Number(b.location.lat).toFixed(4)}, {Number(b.location.lng).toFixed(4)}</span>}
+                      {b.problemDetails?.warningLights          && <span className="bd-info-chip warn">⚠️ لمبة تحذير</span>}
+                      {b.problemDetails?.isRecurring            && <span className="bd-info-chip">🔁 متكررة</span>}
+                      {b.problemDetails?.carRunning===false     && <span className="bd-info-chip err">🔴 واقفة</span>}
                     </div>
                     <div style={{ display:'flex', alignItems:'center', gap:'.7rem' }}>
                       <span className="bd-date">{new Date(b.createdAt).toLocaleDateString('ar')}</span>
@@ -1043,6 +630,9 @@ const MyBreakdownsPage = ({ api, setToast, onNew, onViewProposals }) => {
             })}
           </div>
         )}
+
+      {/* PDF Modal */}
+      {pdfModal && <PdfViewerModal pdfUrl={pdfModal.url} onClose={() => setPdfModal(null)}/>}
     </div>
   );
 };
@@ -1052,8 +642,14 @@ const BreakdownProposalsPage = ({ api, breakdown, setToast, onBack, onAccepted }
   const [loading, setLoading]     = useState(true);
   const [acting, setActing]       = useState(null);
 
-  const load = useCallback(()=>{ setLoading(true); api(`/breakdowns/${breakdown._id}/proposals`).then(r=>setProposals(r.data)).catch(err=>setToast({type:'error',text:err.message})).finally(()=>setLoading(false)); },[api,breakdown._id]);
-  useEffect(()=>{ load(); },[load]);
+  const load = useCallback(() => {
+    setLoading(true);
+    api(`/breakdowns/${breakdown._id}/proposals`)
+      .then(r => setProposals(r.data))
+      .catch(err => setToast({ type:'error', text:err.message }))
+      .finally(() => setLoading(false));
+  }, [api, breakdown._id]);
+  useEffect(() => { load(); }, [load]);
 
   const accept = async id => {
     try { setActing(id); await api(`/breakdowns/${breakdown._id}/proposals/${id}/accept`,{method:'POST'}); setToast({type:'success',text:'🎉 تم قبول الاقتراح! سيبدأ الميكانيكي بالعمل.'}); onAccepted(); }
@@ -1088,14 +684,14 @@ const BreakdownProposalsPage = ({ api, breakdown, setToast, onBack, onAccepted }
       {loading ? <div className="center-msg"><Spin/> جاري التحميل...</div>
         : proposals.length===0 ? (
           <div className="empty-state">
-            <div style={{ fontSize:'3rem', marginBottom:'.6rem' }}>💬</div>
+            <div style={{fontSize:'3rem',marginBottom:'.6rem'}}>💬</div>
             <div>لا توجد اقتراحات بعد</div>
-            <div style={{ fontSize:'.82rem', marginTop:'.5rem', color:'rgba(255,255,255,.25)' }}>انتظر حتى يتقدم الميكانيكيون</div>
+            <div style={{fontSize:'.82rem',marginTop:'.5rem',color:'rgba(255,255,255,.25)'}}>انتظر حتى يتقدم الميكانيكيون</div>
           </div>
         ) : (
           <div style={{ display:'flex', flexDirection:'column', gap:'1rem' }}>
-            {proposals.map(p=>{
-              const mech = p.mechanicId||{};
+            {proposals.map(p => {
+              const mech  = p.mechanicId||{};
               const isAcc = p.status==='accepted';
               return (
                 <div key={p._id} className={`proposal-card ${isAcc?'proposal-accepted':''}`}>
@@ -1107,7 +703,7 @@ const BreakdownProposalsPage = ({ api, breakdown, setToast, onBack, onAccepted }
                         <div className="mech-pname">{mech.fullName||'ميكانيكي'}</div>
                         <div className="mech-pusername">@{mech.username}</div>
                         {mech.profileData?.phone&&<div className="mech-pphone">📞 {mech.profileData.phone}</div>}
-                        {mech.profileData?.bio&&<div style={{ fontSize:'.78rem', color:'rgba(255,255,255,.35)', marginTop:'.2rem' }}>{mech.profileData.bio}</div>}
+                        {mech.profileData?.bio&&<div style={{fontSize:'.78rem',color:'rgba(255,255,255,.35)',marginTop:'.2rem'}}>{mech.profileData.bio}</div>}
                       </div>
                     </div>
                     <div className="proposal-price"><div className="price-val">{p.price}</div><div className="price-cur">{p.currency}</div></div>
@@ -1138,18 +734,22 @@ const BreakdownProposalsPage = ({ api, breakdown, setToast, onBack, onAccepted }
   );
 };
 
-
+/* ─── Main Dashboard ─── */
 export default function UserDashboard() {
-const accessToken = useAccessToken();
-  const [user, setUser]       = useState(null);
-  const [page, setPage]       = useState('my-breakdowns');
-  const [subPage, setSubPage] = useState(null);
+  const accessToken = useAccessToken();
+  const [user, setUser]        = useState(null);
+  const [page, setPage]        = useState('my-breakdowns');
+  const [subPage, setSubPage]  = useState(null);
   const [toast, setToastState] = useState({ type:'', text:'' });
   const [mounted, setMounted]  = useState(false);
   const api = useApi(accessToken);
   const setToast = msg => { setToastState(msg); setTimeout(()=>setToastState({type:'',text:''}),3500); };
 
-  useEffect(()=>{ setMounted(true); if(!accessToken) return; api('/profile').then(r=>setUser(r.data)).catch(()=>{}); },[]);
+  useEffect(() => {
+    setMounted(true);
+    if (!accessToken) return;
+    api('/profile').then(r=>setUser(r.data)).catch(()=>{});
+  }, []);
 
   const navItems = [
     { key:'my-breakdowns', icon:'🚗', label:'منشوراتي'       },
@@ -1163,25 +763,34 @@ const accessToken = useAccessToken();
   if (!mounted) return null;
   if (!accessToken) return (
     <div style={{ minHeight:'100vh', background:'#080810', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Tajawal,sans-serif', color:'#fff', direction:'rtl', fontSize:'1.1rem' }}>
-      <div style={{ textAlign:'center' }}><div style={{ fontSize:'3rem', marginBottom:'1rem' }}>🔐</div><div>يجب تسجيل الدخول أولاً</div></div>
+      <div style={{ textAlign:'center' }}><div style={{fontSize:'3rem',marginBottom:'1rem'}}>🔐</div><div>يجب تسجيل الدخول أولاً</div></div>
     </div>
   );
 
   const renderPage = () => {
-    if (subPage?.type==='reviews')             return <MechanicReviewsPage   api={api} mechanic={subPage.mechanic} setToast={setToast} onBack={()=>setSubPage(null)}/>;
-    if (subPage?.type==='write')               return <WriteReviewPage        api={api} mechanic={subPage.mechanic} setToast={setToast} onBack={()=>setSubPage(null)}/>;
+    if (subPage?.type==='write-review')        return <WriteReviewPage        api={api} mechanic={subPage.mechanic} setToast={setToast} onBack={()=>setSubPage(null)}/>;
+    if (subPage?.type==='reviews')             return <MechanicReviewsPage    api={api} mechanic={subPage.mechanic} setToast={setToast} onBack={()=>setSubPage(null)}/>;
     if (subPage?.type==='post-breakdown')      return <PostBreakdownPage      accessToken={accessToken} setToast={setToast} onDone={()=>{ setSubPage(null); setPage('my-breakdowns'); }}/>;
     if (subPage?.type==='breakdown-proposals') return <BreakdownProposalsPage api={api} breakdown={subPage.breakdown} setToast={setToast} onBack={()=>setSubPage(null)} onAccepted={()=>{ setSubPage(null); setPage('my-breakdowns'); }}/>;
     if (page==='profile')       return <ProfilePage    api={api} initialUser={user} onUpdate={setUser} setToast={setToast}/>;
-    if (page==='mechanics')     return <MechanicsPage  api={api} setToast={setToast} onSelectMechanic={(m,t)=>setSubPage({type:t,mechanic:m})}/>;
+    if (page==='mechanics')     return <MechanicsPage  api={api} setToast={setToast}/>;
     if (page==='my-reviews')    return <MyReviewsPage  api={api} setToast={setToast}/>;
-    if (page==='my-breakdowns') return <MyBreakdownsPage api={api} setToast={setToast} onNew={()=>setSubPage({type:'post-breakdown'})} onViewProposals={bd=>setSubPage({type:'breakdown-proposals',breakdown:bd})}/>;
+    if (page==='my-breakdowns') return (
+      <MyBreakdownsPage
+        api={api}
+        accessToken={accessToken}
+        setToast={setToast}
+        onNew={()=>setSubPage({type:'post-breakdown'})}
+        onViewProposals={bd=>setSubPage({type:'breakdown-proposals',breakdown:bd})}
+        onWriteReview={mechanic=>setSubPage({type:'write-review',mechanic})}
+      />
+    );
   };
 
   const handleLogout = () => {
-  localStorage.removeItem('accessToken');
-  window.location.href = '/auth'; 
-};
+    localStorage.removeItem('accessToken');
+    window.location.href = '/auth';
+  };
 
   return (
     <>
@@ -1206,6 +815,9 @@ const accessToken = useAccessToken();
         .nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.8)}
         .nav-item.active{background:rgba(14,165,233,.14);color:#38bdf8;font-weight:700;border:1px solid rgba(14,165,233,.22)}
         .nav-ico{font-size:1.1rem;width:22px;text-align:center}
+        .nav-btn{display:flex;align-items:center;gap:.7rem;padding:.72rem .9rem;border-radius:12px;font-size:.92rem;font-weight:500;cursor:pointer;transition:all .2s;margin-bottom:.25rem;border:none;background:transparent;width:100%;text-align:right}
+        .nav-btn:hover{background:rgba(255,255,255,.06)}
+        .nav-left{display:flex;align-items:center;gap:.6rem}
         .main{flex:1;overflow-y:auto;padding:2rem}
         .page{animation:up .35s ease}
         .page-hdr{margin-bottom:1.8rem}
@@ -1253,6 +865,10 @@ const accessToken = useAccessToken();
         .btn-complete{padding:.55rem 1.1rem;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.3);border-radius:10px;color:#a78bfa;font-family:'Tajawal',sans-serif;font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.4rem}
         .btn-complete:hover:not(:disabled){background:rgba(167,139,250,.25)}
         .btn-complete:disabled{opacity:.5;cursor:not-allowed}
+        .btn-pdf{padding:.5rem 1rem;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);border-radius:10px;color:#a78bfa;font-family:'Tajawal',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.4rem}
+        .btn-pdf:hover{background:rgba(167,139,250,.25)}
+        .btn-review{padding:.5rem 1rem;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);border-radius:10px;color:#fbbf24;font-family:'Tajawal',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:.4rem}
+        .btn-review:hover{background:rgba(245,158,11,.22)}
         .profile-avatar-row{display:flex;align-items:center;gap:1.2rem;margin-bottom:1.8rem;padding-bottom:1.4rem;border-bottom:1px solid rgba(255,255,255,.07)}
         .big-avatar{width:64px;height:64px;background:linear-gradient(135deg,#0ea5e9,#6366f1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;flex-shrink:0}
         .pname{font-size:1.15rem;font-weight:700;color:#fff}
@@ -1315,7 +931,6 @@ const accessToken = useAccessToken();
         .img-add-more{width:90px;height:90px;border-radius:10px;border:1px dashed rgba(255,255,255,.2);display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.35);cursor:pointer}
         .center-msg{text-align:center;padding:3rem;color:rgba(255,255,255,.35);font-size:.95rem;display:flex;align-items:center;justify-content:center;gap:.6rem}
         .empty-state{text-align:center;padding:4rem 2rem;color:rgba(255,255,255,.3);font-size:.95rem;display:flex;flex-direction:column;align-items:center}
-
         .proposal-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:18px;padding:1.3rem 1.5rem;transition:border-color .2s,transform .15s}
         .proposal-card:hover{border-color:rgba(14,165,233,.25);transform:translateY(-1px)}
         .proposal-accepted{border-color:rgba(16,185,129,.35)!important;background:rgba(16,185,129,.04)!important}
@@ -1354,17 +969,10 @@ const accessToken = useAccessToken();
             </button>
           ))}
           <div style={{ marginTop:'auto', paddingTop:'1rem' }}>
-  <button
-    className="nav-btn"
-    onClick={handleLogout}
-    style={{ color:'rgba(239,68,68,.7)', width:'100%' }}
-  >
-    <div className="nav-left">
-      <span className="nav-ico">🚪</span>
-      تسجيل الخروج
-    </div>
-  </button>
-</div>
+            <button className="nav-btn" onClick={handleLogout} style={{ color:'rgba(239,68,68,.7)', width:'100%' }}>
+              <div className="nav-left"><span className="nav-ico">🚪</span>تسجيل الخروج</div>
+            </button>
+          </div>
         </nav>
         <main className="main">{renderPage()}</main>
       </div>

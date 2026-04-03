@@ -650,11 +650,12 @@ const MyProposalsPage = ({ api, setToast, onReport }) => {
   );
 };
 
+// ============================================================
+// ReportPage — يرسل JSON بدل PDF
+// ============================================================
 const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
-  const [step, setStep]           = useState(1);
+  const [step, setStep]             = useState(1);
   const [submitting, setSubmitting] = useState(false);
-  const [pdfBlob, setPdfBlob]     = useState(null);
-  const [pdfUrl, setPdfUrl]       = useState(null);
   const [form, setForm] = useState({
     solutionSummary: '',
     finalPrice: '',
@@ -671,165 +672,48 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
   const totalParts = form.spareParts.reduce((s,p)=>s+(p.quantity*p.price),0);
   const grandTotal = form.finalPrice ? Number(form.finalPrice) : totalParts;
 
- const generatePdf = async () => {
-  // تحميل المكتبات المطلوبة
-  if (!window.html2canvas) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-  }
-  if (!window.jspdf) {
-    await new Promise((res, rej) => {
-      const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-      s.onload = res; s.onerror = rej;
-      document.head.appendChild(s);
-    });
-  }
-
-  const car = breakdown.carInfo || {};
-  const validParts = form.spareParts.filter(p => p.name.trim());
-  const total = form.finalPrice ? Number(form.finalPrice) : totalParts;
-
-  // إنشاء عنصر HTML مؤقت بخط عربي
-  const container = document.createElement('div');
-  container.style.cssText = `
-    position: fixed; top: -9999px; left: -9999px;
-    width: 794px; background: #fff; font-family: 'Tajawal', 'Arial', sans-serif;
-    direction: rtl; color: #1a1a2e; padding: 0;
-  `;
-
-  container.innerHTML = `
-    <div style="background: linear-gradient(135deg,#1e82e6,#0f4fa8); padding: 32px 40px; color: #fff;">
-      <div style="font-size: 26px; font-weight: 900; margin-bottom: 4px;">تقرير الإصلاح</div>
-      <div style="font-size: 13px; opacity: .75;">AutoCare Platform — ${new Date().toLocaleDateString('ar-SA')}</div>
-    </div>
-
-    <div style="padding: 32px 40px;">
-
-      <div style="background: #f0f4ff; border-right: 4px solid #1e82e6; border-radius: 10px; padding: 16px 20px; margin-bottom: 24px;">
-        <div style="font-size: 13px; font-weight: 700; color: #555; margin-bottom: 8px;">معلومات السيارة</div>
-        <div style="font-size: 18px; font-weight: 900; color: #1a1a2e;">${car.brand || '—'} ${car.model || ''} ${car.year ? `(${car.year})` : ''}</div>
-        <div style="font-size: 13px; color: #666; margin-top: 4px;">
-          ${car.fuelType ? `الوقود: ${car.fuelType}` : ''}
-          ${car.transmission ? ` &nbsp;|&nbsp; ناقل الحركة: ${car.transmission}` : ''}
-          ${car.mileage ? ` &nbsp;|&nbsp; الكيلومترات: ${car.mileage.toLocaleString()} كم` : ''}
-        </div>
-      </div>
-
-      <div style="margin-bottom: 20px;">
-        <div style="font-size: 14px; font-weight: 700; color: #1e82e6; border-bottom: 2px solid #1e82e6; padding-bottom: 6px; margin-bottom: 10px;">المشكلة</div>
-        <div style="font-size: 14px; color: #333; line-height: 1.7;">${breakdown.title || '—'}</div>
-        ${breakdown.description ? `<div style="font-size: 13px; color: #555; margin-top: 6px; line-height: 1.7;">${breakdown.description}</div>` : ''}
-      </div>
-
-      <div style="margin-bottom: 20px;">
-        <div style="font-size: 14px; font-weight: 700; color: #10b981; border-bottom: 2px solid #10b981; padding-bottom: 6px; margin-bottom: 10px;">ملخص الحل</div>
-        <div style="font-size: 14px; color: #333; line-height: 1.7;">${form.solutionSummary}</div>
-      </div>
-
-      ${validParts.length > 0 ? `
-      <div style="margin-bottom: 24px;">
-        <div style="font-size: 14px; font-weight: 700; color: #f59e0b; border-bottom: 2px solid #f59e0b; padding-bottom: 6px; margin-bottom: 10px;">قطع الغيار المستخدمة</div>
-        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
-          <thead>
-            <tr style="background: #1e82e6; color: #fff;">
-              <th style="padding: 10px 14px; text-align: right; border-radius: 4px 0 0 4px;">اسم القطعة</th>
-              <th style="padding: 10px 14px; text-align: center;">الكمية</th>
-              <th style="padding: 10px 14px; text-align: center;">سعر الوحدة</th>
-              <th style="padding: 10px 14px; text-align: center; border-radius: 0 4px 4px 0;">الإجمالي</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${validParts.map((p, i) => `
-              <tr style="background: ${i % 2 === 0 ? '#f8f9fa' : '#fff'};">
-                <td style="padding: 9px 14px; color: #1a1a2e; font-weight: 600;">${p.name}</td>
-                <td style="padding: 9px 14px; text-align: center; color: #555;">${p.quantity}</td>
-                <td style="padding: 9px 14px; text-align: center; color: #555;">${p.price} ${form.currency}</td>
-                <td style="padding: 9px 14px; text-align: center; font-weight: 700; color: #1a1a2e;">${(p.quantity * p.price).toFixed(2)} ${form.currency}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-        <div style="text-align: left; margin-top: 8px; font-size: 13px; color: #666;">
-          مجموع القطع: <strong style="color: #f59e0b;">${totalParts.toFixed(2)} ${form.currency}</strong>
-        </div>
-      </div>
-      ` : ''}
-
-      <div style="background: linear-gradient(135deg,#1e82e6,#0f4fa8); border-radius: 12px; padding: 20px 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <div style="color: rgba(255,255,255,.8); font-size: 15px; font-weight: 600;">إجمالي الفاتورة</div>
-        <div style="color: #fbbf24; font-size: 26px; font-weight: 900;">${total.toFixed(2)} ${form.currency}</div>
-      </div>
-
-      ${form.mechanicNotes.trim() ? `
-      <div>
-        <div style="font-size: 14px; font-weight: 700; color: #888; border-bottom: 2px solid #ddd; padding-bottom: 6px; margin-bottom: 10px;">ملاحظات الميكانيكي</div>
-        <div style="font-size: 13px; color: #555; line-height: 1.7; padding: 12px 16px; background: #f8f9fa; border-radius: 8px; border-right: 3px solid #ccc;">${form.mechanicNotes}</div>
-      </div>
-      ` : ''}
-
-    </div>
-
-    <div style="background: #1e82e6; color: rgba(255,255,255,.8); text-align: center; padding: 14px; font-size: 12px;">
-      AutoCare Platform — تقرير الإصلاح المهني
-    </div>
-  `;
-
-  document.body.appendChild(container);
-
-  try {
-    const canvas = await window.html2canvas(container, {
-      scale: 1.5,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-    });
-
-    const { jsPDF } = window.jspdf;
-const imgData = canvas.toDataURL('image/jpeg', 0.85);
-    const pdfWidth = 210; // A4 mm
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-    const doc = new jsPDF({
-      orientation: pdfHeight > pdfWidth ? 'portrait' : 'landscape',
-      unit: 'mm',
-      format: [pdfWidth, pdfHeight],
-    });
-
-doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    setPdfBlob(blob);
-    setPdfUrl(url);
-    setStep(2);
-  } finally {
-    document.body.removeChild(container);
-  }
-};
-
   const submitReport = async () => {
-    if (!pdfBlob) { setToast({ type:'error', text:'يرجى توليد الـ PDF أولاً' }); return; }
+    if (!form.solutionSummary.trim()) {
+      setToast({ type:'error', text:'يرجى كتابة ملخص الحل' });
+      return;
+    }
+    if (grandTotal <= 0) {
+      setToast({ type:'error', text:'يرجى إدخال السعر النهائي' });
+      return;
+    }
     try {
       setSubmitting(true);
-      const fd=new FormData();
-      fd.append('reportPdf', pdfBlob, `report_${breakdown._id}.pdf`);
-      fd.append('solutionSummary', form.solutionSummary);
-      fd.append('finalPrice', String(grandTotal));
-      fd.append('spareParts', JSON.stringify(form.spareParts.filter(p=>p.name.trim())));
-      const res=await fetch(`${API_BASE_URL}/api/mechanics/breakdowns/${breakdown._id}/report`,{ method:'POST', headers:{ Authorization:`Bearer ${accessToken}` }, body:fd });
-      const data=await res.json();
-      if (!res.ok||!data.success) throw new Error(data.error||'فشل الرفع');
-      setToast({ type:'success', text:'✅ تم إرسال التقرير للعميل! تم إغلاق الطلب.' });
-      setStep(3);
+      const payload = {
+        solutionSummary: form.solutionSummary,
+        finalPrice: grandTotal,
+        currency: form.currency,
+        spareParts: form.spareParts.filter(p => p.name.trim()),
+        mechanicNotes: form.mechanicNotes,
+      };
+      const res = await fetch(
+        `${API_BASE_URL}/api/mechanics/breakdowns/${breakdown._id}/report`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+      const data = await res.json();
+      if (!res.ok || !data.success) throw new Error(data.error || 'فشل الإرسال');
+      setToast({ type:'success', text:'✅ تم إرسال التقرير للعميل!' });
+      setStep(2);
       setTimeout(onDone, 2000);
-    } catch(err){ setToast({ type:'error', text:err.message }); } finally { setSubmitting(false); }
+    } catch(err) {
+      setToast({ type:'error', text:err.message });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const car=breakdown.carInfo||{};
+  const car = breakdown.carInfo || {};
 
   return (
     <div className="page">
@@ -840,12 +724,13 @@ doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
         </div>
       </div>
 
+      {/* Steps: 2 only */}
       <div className="rpt-steps">
-        {[['1','تعبئة البيانات'],['2','معاينة الـ PDF'],['3','تم الإرسال']].map(([n,l],i)=>(
+        {[['1','تعبئة البيانات'],['2','تم الإرسال']].map(([n,l],i)=>(
           <div key={n} className={`rpt-step ${step>=Number(n)?'rpt-step-done':''} ${step===Number(n)?'rpt-step-active':''}`}>
             <div className="rpt-step-num">{step>Number(n)?'✓':n}</div>
             <div className="rpt-step-lbl">{l}</div>
-            {i<2&&<div className="rpt-step-line"/>}
+            {i<1&&<div className="rpt-step-line"/>}
           </div>
         ))}
       </div>
@@ -855,7 +740,7 @@ doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
           <div className="form-grid">
             <div className="fg full">
               <label className="lbl">ملخص الحل <span style={{ color:'#ef4444' }}>*</span></label>
-              <textarea className="inp" rows={4} required value={form.solutionSummary} onChange={f('solutionSummary')} placeholder="اشرح ما تم عمله لحل المشكلة..." style={{ resize:'vertical', paddingTop:'.75rem', paddingRight:'.9rem' }}/>
+              <textarea className="inp" rows={4} value={form.solutionSummary} onChange={f('solutionSummary')} placeholder="اشرح ما تم عمله لحل المشكلة..." style={{ resize:'vertical', paddingTop:'.75rem', paddingRight:'.9rem' }}/>
             </div>
             <div className="fg full">
               <div className="sec-title" style={{ marginBottom:'.8rem' }}>🔩 قطع الغيار المستخدمة</div>
@@ -872,7 +757,7 @@ doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
               {totalParts>0&&<div style={{ textAlign:'left', marginTop:'.5rem', fontSize:'.85rem', color:'rgba(255,255,255,.4)' }}>مجموع القطع: <span style={{ color:'#fbbf24', fontWeight:700 }}>{totalParts.toFixed(2)} {form.currency}</span></div>}
             </div>
             <div className="fg">
-              <label className="lbl">السعر النهائي الإجمالي</label>
+              <label className="lbl">السعر النهائي الإجمالي <span style={{ color:'#ef4444' }}>*</span></label>
               <div className="inp-wrap"><span className="ico">💰</span><input className="inp" type="number" min="0" step="0.5" value={form.finalPrice} onChange={f('finalPrice')} placeholder={totalParts>0?`${totalParts.toFixed(2)} (تلقائي)`:'ادخل المبلغ'}/></div>
             </div>
             <div className="fg">
@@ -890,35 +775,23 @@ doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
               </div>
             </div>
             <div className="fg full">
-              <button className="btn-primary" disabled={!form.solutionSummary.trim()||(!form.finalPrice&&totalParts===0)} onClick={generatePdf}>
-                👁️ معاينة وتوليد الـ PDF
+              <button
+                className="btn-primary"
+                disabled={submitting || !form.solutionSummary.trim() || grandTotal <= 0}
+                onClick={submitReport}
+              >
+                {submitting ? <><Spin/> جاري الإرسال...</> : '📤 إرسال التقرير للعميل'}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {step===2 && pdfUrl && (
-        <div style={{ maxWidth:680 }}>
-          <div className="card-glass" style={{ marginBottom:'1rem' }}>
-            <div className="sec-title" style={{ marginBottom:'1rem' }}>👁️ معاينة التقرير</div>
-            <iframe src={pdfUrl} width="100%" height="500px" style={{ borderRadius:10, border:'1px solid rgba(255,255,255,.1)' }} title="PDF Preview"/>
-          </div>
-          <div style={{ display:'flex', gap:'.9rem' }}>
-            <button className="btn-outline-sm" style={{ flex:1, justifyContent:'center', padding:'.8rem' }} onClick={()=>setStep(1)}>✏️ تعديل</button>
-            <a href={pdfUrl} download={`repair-report.pdf`} className="btn-outline-sm" style={{ flex:1, justifyContent:'center', padding:'.8rem', textDecoration:'none', textAlign:'center' }}>⬇️ تحميل</a>
-            <button className="btn-primary" style={{ flex:2 }} disabled={submitting} onClick={submitReport}>
-              {submitting?<><Spin/> جاري الإرسال...</>:'📤 إرسال للعميل'}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {step===3 && (
+      {step===2 && (
         <div className="card-glass" style={{ textAlign:'center', padding:'3rem', maxWidth:500 }}>
           <div style={{ fontSize:'4rem', marginBottom:'1rem' }}>🎉</div>
           <div style={{ fontSize:'1.3rem', fontWeight:900, color:'#6ee7b7', marginBottom:'.5rem' }}>تم إرسال التقرير بنجاح!</div>
-          <div style={{ color:'rgba(255,255,255,.45)', fontSize:'.9rem' }}>وصل الـ PDF للعميل ويمكنه تحميله وتقييم خدمتك الآن.</div>
+          <div style={{ color:'rgba(255,255,255,.45)', fontSize:'.9rem' }}>وصلت بيانات التقرير للعميل ويمكنه الآن تقييم خدمتك.</div>
         </div>
       )}
     </div>
@@ -980,9 +853,9 @@ export default function MechanicDashboard() {
   };
 
   const handleLogout = () => {
-  localStorage.removeItem('accessToken');
-  window.location.href = '/auth';
-};
+    localStorage.removeItem('accessToken');
+    window.location.href = '/auth';
+  };
 
   return (
     <>
@@ -1131,7 +1004,6 @@ export default function MechanicDashboard() {
         .prop-val{font-size:.82rem;color:rgba(255,255,255,.65);font-weight:600}
         .prop-desc{font-size:.87rem;color:rgba(255,255,255,.55);line-height:1.6;padding:.6rem .8rem;background:rgba(255,255,255,.04);border-radius:10px;margin-bottom:.5rem}
         .prop-notes{font-size:.8rem;color:rgba(255,255,255,.35);padding:.4rem .7rem;border-right:2px solid rgba(255,255,255,.12)}
-
         .rpt-steps{display:flex;align-items:center;margin-bottom:1.8rem;gap:0}
         .rpt-step{display:flex;flex-direction:column;align-items:center;position:relative;flex:1}
         .rpt-step-num{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:rgba(255,255,255,.35);transition:all .3s;z-index:1}
@@ -1146,7 +1018,6 @@ export default function MechanicDashboard() {
         .btn-add-part{margin-top:.4rem;padding:.4rem .85rem;background:rgba(56,189,248,.08);border:1px dashed rgba(56,189,248,.3);border-radius:9px;color:#38bdf8;font-family:'Tajawal',sans-serif;font-size:.83rem;cursor:pointer;transition:all .2s}
         .btn-add-part:hover{background:rgba(56,189,248,.15)}
         .total-box{display:flex;justify-content:space-between;align-items:center;background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:14px;padding:1rem 1.2rem}
-
         @media(max-width:680px){
           .sidebar{display:none}.main{padding:1rem}.form-grid{grid-template-columns:1fr}.fg.full{grid-column:1}
           .bd-detail-grid{grid-template-columns:1fr}.bd-actions{flex-direction:column}
@@ -1169,17 +1040,10 @@ export default function MechanicDashboard() {
             </button>
           ))}
           <div style={{ marginTop:'auto', paddingTop:'1rem' }}>
-  <button
-    className="nav-btn"
-    onClick={handleLogout}
-    style={{ color:'rgba(239,68,68,.7)', width:'100%' }}
-  >
-    <div className="nav-left">
-      <span className="nav-ico">🚪</span>
-      تسجيل الخروج
-    </div>
-  </button>
-</div>
+            <button className="nav-btn" onClick={handleLogout} style={{ color:'rgba(239,68,68,.7)', width:'100%' }}>
+              <div className="nav-left"><span className="nav-ico">🚪</span>تسجيل الخروج</div>
+            </button>
+          </div>
         </nav>
         <main className="main">{renderPage()}</main>
       </div>

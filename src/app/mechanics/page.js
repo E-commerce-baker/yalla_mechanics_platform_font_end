@@ -683,13 +683,13 @@ const ReportPage = ({ api, accessToken, breakdown, setToast, onDone }) => {
     }
     try {
       setSubmitting(true);
-      const payload = {
-        solutionSummary: form.solutionSummary,
-        finalPrice: grandTotal,
-        currency: form.currency,
-        spareParts: form.spareParts.filter(p => p.name.trim()),
-        mechanicNotes: form.mechanicNotes,
-      };
+   const payload = {
+  solutionSummary: form.solutionSummary.trim(), // زيادة حرص
+  finalPrice: Number(grandTotal),               // لضمان أنه رقم
+  currency: form.currency || 'JOD',
+  spareParts: form.spareParts.filter(p => p.name.trim() !== ''),
+  mechanicNotes: form.mechanicNotes,
+};
       const res = await fetch(
         `${API_BASE_URL}/api/mechanics/breakdowns/${breakdown._id}/report`,
         {

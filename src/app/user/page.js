@@ -1,10 +1,10 @@
 'use client'
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAccessToken } from '../useAccessToken';
-import jsPDF from 'jspdf';
+import jsPDF from 'jspdf'; // ✅ استيراد jsPDF
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
-const API_BASE =`${API_BASE_URL}/api/users`;
+const API_BASE = `${API_BASE_URL}/api/users`;
 
 const useApi = (accessToken) =>
   useCallback(async (path, options = {}) => {
@@ -53,166 +53,155 @@ const StatusBadge = ({ status }) => {
   return <span style={{ fontSize:'.72rem', fontWeight:700, padding:'.2rem .6rem', borderRadius:20, background:s.bg, color:s.color, border:`1px solid ${s.color}33` }}>{s.icon} {s.label}</span>;
 };
 
-/* ─── Mechanic Detail Modal ─── */
-const MechanicDetailModal = ({ mechanic, onClose }) => {
-  if (!mechanic) return null;
-  return (
-    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,.78)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem' }} onClick={onClose}>
-      <div style={{ background:'#0f1117', border:'1px solid rgba(255,255,255,.12)', borderRadius:22, padding:'2rem', width:'100%', maxWidth:440, animation:'up .25s ease' }} onClick={e=>e.stopPropagation()}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1.6rem' }}>
-          <div style={{ fontSize:'1.1rem', fontWeight:800, color:'#fff' }}>معلومات الميكانيكي</div>
-          <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,.4)', fontSize:'1.3rem', cursor:'pointer' }}>✕</button>
-        </div>
-        <div style={{ display:'flex', alignItems:'center', gap:'1rem', marginBottom:'1.5rem', paddingBottom:'1.2rem', borderBottom:'1px solid rgba(255,255,255,.08)' }}>
-          <div style={{ width:60, height:60, background:'linear-gradient(135deg,#0ea5e9,#6366f1)', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1.6rem', flexShrink:0 }}>🔧</div>
-          <div>
-            <div style={{ fontSize:'1.1rem', fontWeight:800, color:'#fff' }}>{mechanic.fullName}</div>
-            <div style={{ fontSize:'.82rem', color:'rgba(255,255,255,.38)', marginTop:'.2rem' }}>@{mechanic.username}</div>
-          </div>
-        </div>
-        <div style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
-          {mechanic.profileData?.phone && (
-            <div style={{ display:'flex', alignItems:'center', gap:'.7rem', padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
-              <span style={{ fontSize:'1.1rem' }}>📞</span>
-              <div>
-                <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.1rem' }}>رقم الهاتف</div>
-                <div style={{ fontSize:'.92rem', color:'#fff', fontWeight:600 }}>{mechanic.profileData.phone}</div>
-              </div>
-            </div>
-          )}
-          {mechanic.email && (
-            <div style={{ display:'flex', alignItems:'center', gap:'.7rem', padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
-              <span style={{ fontSize:'1.1rem' }}>✉️</span>
-              <div>
-                <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.1rem' }}>البريد الإلكتروني</div>
-                <div style={{ fontSize:'.9rem', color:'#fff', fontWeight:600 }}>{mechanic.email}</div>
-              </div>
-            </div>
-          )}
-          {mechanic.location && (
-            <div style={{ display:'flex', alignItems:'center', gap:'.7rem', padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
-              <span style={{ fontSize:'1.1rem' }}>📍</span>
-              <div>
-                <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.1rem' }}>{mechanic.location.businessName || 'الموقع'}</div>
-                <div style={{ fontSize:'.88rem', color:'#fff', fontWeight:600 }}>{mechanic.location.address}</div>
-              </div>
-            </div>
-          )}
-          {mechanic.profileData?.bio && (
-            <div style={{ padding:'.75rem 1rem', background:'rgba(255,255,255,.04)', borderRadius:12, border:'1px solid rgba(255,255,255,.07)' }}>
-              <div style={{ fontSize:'.72rem', color:'rgba(255,255,255,.3)', marginBottom:'.35rem' }}>نبذة</div>
-              <div style={{ fontSize:'.88rem', color:'rgba(255,255,255,.65)', lineHeight:1.6 }}>{mechanic.profileData.bio}</div>
-            </div>
-          )}
-          {!mechanic.profileData?.phone && !mechanic.profileData?.bio && !mechanic.location && (
-            <div style={{ textAlign:'center', padding:'1.5rem', color:'rgba(255,255,255,.3)', fontSize:'.9rem' }}>لا توجد معلومات إضافية</div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
+import{ useRef } from 'react';
+import html2canvas from 'html2canvas';
 
-/* ─── PDF Viewer Modal — يولّد PDF من JSON باستخدام jsPDF ─── */
-const PdfViewerModal = ({ reportData, onClose }) => {
+const PdfViewerModal = ({ reportData, breakdownInfo, onClose }) => {
   const [pdfUrl, setPdfUrl] = useState(null);
+  
+  // مرجع للـ Div الذي يحتوي على تصميم التقرير
+  const reportRef = useRef(null);
 
   useEffect(() => {
     if (!reportData) return;
 
-    const doc = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
-    });
+    const generatePdf = async () => {
+      try {
+        const element = reportRef.current;
+        // أخذ لقطة للـ HTML بجودة عالية
+        const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(16);
+        // إنشاء ملف الـ PDF
+        const pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4'
+        });
 
-    // العنوان
-    doc.text('Repair Report / تقرير الإصلاح', 105, 20, { align: 'center' });
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-    doc.setFontSize(12);
-    let y = 40;
+        // إضافة اللقطة كصورة داخل الـ PDF
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
-    // ملخص الحل
-    doc.text('Solution Summary:', 20, y);
-    y += 7;
-    const summaryLines = doc.splitTextToSize(reportData.solutionSummary || '-', 170);
-    doc.setFontSize(10);
-    doc.text(summaryLines, 20, y);
-    y += summaryLines.length * 5 + 10;
+        // إنشاء رابط المعاينة
+        const blob = pdf.output('blob');
+        const url = URL.createObjectURL(blob);
+        setPdfUrl(url);
+      } catch (error) {
+        console.error("Error generating PDF:", error);
+      }
+    };
 
-    doc.setFontSize(12);
+    // تأخير بسيط جداً لضمان تحميل عناصر الـ HTML قبل أخذ اللقطة
+    setTimeout(generatePdf, 100);
 
-    // قطع الغيار
-    if (reportData.spareParts && reportData.spareParts.length > 0) {
-      doc.text('Spare Parts:', 20, y);
-      y += 7;
-      doc.setFontSize(10);
-      reportData.spareParts.forEach((part, i) => {
-        doc.text(
-          `${i + 1}. ${part.name} — Qty: ${part.quantity} — Price: ${part.price} ${reportData.currency}`,
-          25,
-          y
-        );
-        y += 6;
-      });
-      y += 5;
-    }
+  }, [reportData, breakdownInfo]);
 
-    doc.setFontSize(12);
-
-    // السعر النهائي
-    doc.text(
-      `Final Price: ${reportData.finalPrice} ${reportData.currency}`,
-      20,
-      y
-    );
-    y += 10;
-
-    // ملاحظات الميكانيكي
-    if (reportData.mechanicNotes) {
-      doc.text('Mechanic Notes:', 20, y);
-      y += 7;
-      const notesLines = doc.splitTextToSize(reportData.mechanicNotes, 170);
-      doc.setFontSize(10);
-      doc.text(notesLines, 20, y);
-      y += notesLines.length * 5 + 5;
-    }
-
-    // تاريخ التقرير
-    doc.setFontSize(9);
-    doc.text(
-      `Submitted: ${new Date(reportData.submittedAt).toLocaleString('en')}`,
-      20,
-      y
-    );
-
-    const blob = doc.output('blob');
-    const url = URL.createObjectURL(blob);
-    setPdfUrl(url);
-
-    return () => URL.revokeObjectURL(url);
-  }, [reportData]);
-
-  if (!reportData || !pdfUrl) return null;
+  if (!reportData) return null;
 
   return (
-    <div style={{ position:'fixed', inset:0, zIndex:1000, background:'rgba(0,0,0,.85)', backdropFilter:'blur(10px)', display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem' }} onClick={onClose}>
-      <div style={{ background:'#0f1117', border:'1px solid rgba(255,255,255,.12)', borderRadius:20, padding:'1.5rem', width:'100%', maxWidth:780, maxHeight:'92vh', display:'flex', flexDirection:'column', animation:'up .25s ease' }} onClick={e=>e.stopPropagation()}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'1rem' }}>
-          <div style={{ fontSize:'1rem', fontWeight:800, color:'#fff' }}>📄 تقرير الإصلاح</div>
-          <div style={{ display:'flex', gap:'.7rem' }}>
-            <a href={pdfUrl} download="repair-report.pdf" style={{ padding:'.42rem .9rem', background:'rgba(16,185,129,.12)', border:'1px solid rgba(16,185,129,.3)', borderRadius:9, color:'#6ee7b7', fontSize:'.82rem', fontWeight:700, textDecoration:'none', display:'inline-flex', alignItems:'center', gap:'.35rem' }}>⬇️ تحميل</a>
-            <button onClick={onClose} style={{ background:'none', border:'none', color:'rgba(255,255,255,.4)', fontSize:'1.3rem', cursor:'pointer' }}>✕</button>
+    <>
+      {/* هذا الـ Div يحتوي على التقرير الفعلي. 
+        جعلناه مخفياً خارج الشاشة لكي نقرأه برمجياً دون أن نُخرب واجهة المستخدم
+      */}
+      <div style={offScreenContainerStyle}>
+        <div ref={reportRef} style={reportPageStyle}>
+          <h1 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '20px' }}>تقرير إصلاح المركبة</h1>
+          <hr style={{ borderTop: '1px solid #ccc', marginBottom: '20px' }} />
+
+          {/* معلومات المركبة */}
+          {breakdownInfo && (
+            <div style={{ marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>معلومات المركبة:</h2>
+              <p style={{ fontSize: '14px', margin: '5px 0' }}>
+                {`${breakdownInfo.brand || ''} ${breakdownInfo.model || ''} ${breakdownInfo.year || ''}`}
+              </p>
+              {breakdownInfo.fuelType && (
+                <p style={{ fontSize: '14px', margin: '5px 0' }}>نوع الوقود: {breakdownInfo.fuelType}</p>
+              )}
+            </div>
+          )}
+
+          {/* ملخص الحل */}
+          <div style={{ marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>ملخص الإصلاح والحل:</h2>
+            <p style={{ fontSize: '14px', lineHeight: '1.6' }}>{reportData.solutionSummary || '-'}</p>
+          </div>
+
+          {/* قطع الغيار */}
+          {reportData.spareParts && reportData.spareParts.length > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>قطع الغيار المستخدمة:</h2>
+              <ul style={{ padding: '0 20px', margin: 0 }}>
+                {reportData.spareParts.map((part, i) => (
+                  <li key={i} style={{ fontSize: '14px', margin: '8px 0' }}>
+                    {part.name} - الكمية: {part.quantity} - السعر: {part.price} {reportData.currency}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* السعر النهائي */}
+          <div style={{ marginTop: '30px', fontSize: '20px', fontWeight: 'bold', color: '#f59e0b' }}>
+            إجمالي التكلفة: {reportData.finalPrice} {reportData.currency}
+          </div>
+
+          {/* التاريخ */}
+          <div style={{ marginTop: '40px', fontSize: '12px', color: '#666' }}>
+            تاريخ التقديم: {new Date(reportData.submittedAt).toLocaleDateString('ar-JO')}
           </div>
         </div>
-        <iframe src={pdfUrl} width="100%" style={{ flex:1, minHeight:500, borderRadius:12, border:'1px solid rgba(255,255,255,.1)' }} title="Repair Report"/>
       </div>
-    </div>
+
+      {/* المودال الأساسي لعرض المعاينة */}
+      {pdfUrl && (
+        <div style={modalOverlayStyle} onClick={onClose}>
+          <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
+            <div style={headerStyle}>
+              <div style={{ display: 'flex', gap: '.7rem' }}>
+                <a href={pdfUrl} download="report.pdf" style={downloadButtonStyle}>⬇️ تحميل التقرير</a>
+                <button onClick={onClose} style={closeButtonStyle}>✕</button>
+              </div>
+              <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>📄 معاينة التقرير</div>
+            </div>
+            <iframe src={pdfUrl} width="100%" style={iframeStyle} title="Repair Report" />
+          </div>
+        </div>
+      )}
+    </>
   );
 };
+
+
+// --- الستايلات الخاصة بالتقرير المخفي ---
+const offScreenContainerStyle = {
+  position: 'absolute',
+  left: '-9999px',
+  top: '-9999px',
+  overflow: 'hidden'
+};
+
+const reportPageStyle = {
+  width: '210mm',         // عرض ورقة A4
+  minHeight: '297mm',     // طول ورقة A4
+  padding: '20mm',
+  backgroundColor: '#ffffff',
+  color: '#000000',
+  direction: 'rtl',       // هنا يتم تفعيل الـ RTL للعربي بشكل طبيعي جداً
+  fontFamily: 'Arial, Tahoma, sans-serif',
+  boxSizing: 'border-box'
+};
+
+// --- الستايلات الخاصة بك السابقة ---
+const modalOverlayStyle = { position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' };
+const modalContentStyle = { background: '#0f1117', border: '1px solid rgba(255,255,255,.12)', borderRadius: 20, padding: '1.5rem', width: '100%', maxWidth: 780, maxHeight: '92vh', display: 'flex', flexDirection: 'column' };
+const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' };
+const downloadButtonStyle = { padding: '.42rem .9rem', background: 'rgba(16,185,129,.12)', border: '1px solid rgba(16,185,129,.3)', borderRadius: 9, color: '#6ee7b7', fontSize: '.82rem', fontWeight: 700, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '.35rem' };
+const closeButtonStyle = { background: 'none', border: 'none', color: 'rgba(255,255,255,.4)', fontSize: '1.3rem', cursor: 'pointer' };
+const iframeStyle = { flex: 1, minHeight: 500, borderRadius: 12, border: '1px solid rgba(255,255,255,.1)' };
 
 const ProfilePage = ({ api, initialUser, onUpdate, setToast }) => {
   const [form, setForm] = useState({ username:initialUser?.username||'', fullName:initialUser?.fullName||'', email:initialUser?.email||'', bio:initialUser?.profileData?.bio||'', phone:initialUser?.profileData?.phone||'' });

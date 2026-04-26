@@ -1,7 +1,9 @@
 'use client'
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAccessToken } from '../useAccessToken';
-import jsPDF from 'jspdf'; // ✅ استيراد jsPDF
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const API_BASE = `${API_BASE_URL}/api/users`;
@@ -53,39 +55,21 @@ const StatusBadge = ({ status }) => {
   return <span style={{ fontSize:'.72rem', fontWeight:700, padding:'.2rem .6rem', borderRadius:20, background:s.bg, color:s.color, border:`1px solid ${s.color}33` }}>{s.icon} {s.label}</span>;
 };
 
-import{ useRef } from 'react';
-import html2canvas from 'html2canvas';
-
 const PdfViewerModal = ({ reportData, breakdownInfo, onClose }) => {
   const [pdfUrl, setPdfUrl] = useState(null);
-  
-  // مرجع للـ Div الذي يحتوي على تصميم التقرير
   const reportRef = useRef(null);
 
   useEffect(() => {
     if (!reportData) return;
-
     const generatePdf = async () => {
       try {
         const element = reportRef.current;
-        // أخذ لقطة للـ HTML بجودة عالية
         const canvas = await html2canvas(element, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
-
-        // إنشاء ملف الـ PDF
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
-        });
-
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-        // إضافة اللقطة كصورة داخل الـ PDF
         pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-        // إنشاء رابط المعاينة
         const blob = pdf.output('blob');
         const url = URL.createObjectURL(blob);
         setPdfUrl(url);
@@ -93,44 +77,28 @@ const PdfViewerModal = ({ reportData, breakdownInfo, onClose }) => {
         console.error("Error generating PDF:", error);
       }
     };
-
-    // تأخير بسيط جداً لضمان تحميل عناصر الـ HTML قبل أخذ اللقطة
     setTimeout(generatePdf, 100);
-
   }, [reportData, breakdownInfo]);
 
   if (!reportData) return null;
 
   return (
     <>
-      {/* هذا الـ Div يحتوي على التقرير الفعلي. 
-        جعلناه مخفياً خارج الشاشة لكي نقرأه برمجياً دون أن نُخرب واجهة المستخدم
-      */}
       <div style={offScreenContainerStyle}>
         <div ref={reportRef} style={reportPageStyle}>
           <h1 style={{ textAlign: 'center', fontSize: '24px', marginBottom: '20px' }}>تقرير إصلاح المركبة</h1>
           <hr style={{ borderTop: '1px solid #ccc', marginBottom: '20px' }} />
-
-          {/* معلومات المركبة */}
           {breakdownInfo && (
             <div style={{ marginBottom: '20px' }}>
               <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>معلومات المركبة:</h2>
-              <p style={{ fontSize: '14px', margin: '5px 0' }}>
-                {`${breakdownInfo.brand || ''} ${breakdownInfo.model || ''} ${breakdownInfo.year || ''}`}
-              </p>
-              {breakdownInfo.fuelType && (
-                <p style={{ fontSize: '14px', margin: '5px 0' }}>نوع الوقود: {breakdownInfo.fuelType}</p>
-              )}
+              <p style={{ fontSize: '14px', margin: '5px 0' }}>{`${breakdownInfo.brand || ''} ${breakdownInfo.model || ''} ${breakdownInfo.year || ''}`}</p>
+              {breakdownInfo.fuelType && <p style={{ fontSize: '14px', margin: '5px 0' }}>نوع الوقود: {breakdownInfo.fuelType}</p>}
             </div>
           )}
-
-          {/* ملخص الحل */}
           <div style={{ marginBottom: '20px' }}>
             <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>ملخص الإصلاح والحل:</h2>
             <p style={{ fontSize: '14px', lineHeight: '1.6' }}>{reportData.solutionSummary || '-'}</p>
           </div>
-
-          {/* قطع الغيار */}
           {reportData.spareParts && reportData.spareParts.length > 0 && (
             <div style={{ marginBottom: '20px' }}>
               <h2 style={{ fontSize: '18px', marginBottom: '10px' }}>قطع الغيار المستخدمة:</h2>
@@ -143,20 +111,14 @@ const PdfViewerModal = ({ reportData, breakdownInfo, onClose }) => {
               </ul>
             </div>
           )}
-
-          {/* السعر النهائي */}
           <div style={{ marginTop: '30px', fontSize: '20px', fontWeight: 'bold', color: '#f59e0b' }}>
             إجمالي التكلفة: {reportData.finalPrice} {reportData.currency}
           </div>
-
-          {/* التاريخ */}
           <div style={{ marginTop: '40px', fontSize: '12px', color: '#666' }}>
             تاريخ التقديم: {new Date(reportData.submittedAt).toLocaleDateString('ar-JO')}
           </div>
         </div>
       </div>
-
-      {/* المودال الأساسي لعرض المعاينة */}
       {pdfUrl && (
         <div style={modalOverlayStyle} onClick={onClose}>
           <div style={modalContentStyle} onClick={e => e.stopPropagation()}>
@@ -175,27 +137,8 @@ const PdfViewerModal = ({ reportData, breakdownInfo, onClose }) => {
   );
 };
 
-
-// --- الستايلات الخاصة بالتقرير المخفي ---
-const offScreenContainerStyle = {
-  position: 'absolute',
-  left: '-9999px',
-  top: '-9999px',
-  overflow: 'hidden'
-};
-
-const reportPageStyle = {
-  width: '210mm',         // عرض ورقة A4
-  minHeight: '297mm',     // طول ورقة A4
-  padding: '20mm',
-  backgroundColor: '#ffffff',
-  color: '#000000',
-  direction: 'rtl',       // هنا يتم تفعيل الـ RTL للعربي بشكل طبيعي جداً
-  fontFamily: 'Arial, Tahoma, sans-serif',
-  boxSizing: 'border-box'
-};
-
-// --- الستايلات الخاصة بك السابقة ---
+const offScreenContainerStyle = { position: 'absolute', left: '-9999px', top: '-9999px', overflow: 'hidden' };
+const reportPageStyle = { width: '210mm', minHeight: '297mm', padding: '20mm', backgroundColor: '#ffffff', color: '#000000', direction: 'rtl', fontFamily: 'Arial, Tahoma, sans-serif', boxSizing: 'border-box' };
 const modalOverlayStyle = { position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,.85)', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' };
 const modalContentStyle = { background: '#0f1117', border: '1px solid rgba(255,255,255,.12)', borderRadius: 20, padding: '1.5rem', width: '100%', maxWidth: 780, maxHeight: '92vh', display: 'flex', flexDirection: 'column' };
 const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' };
@@ -237,12 +180,12 @@ const ProfilePage = ({ api, initialUser, onUpdate, setToast }) => {
   );
 };
 
-/* ─── Mechanics Page — view only, click to see details ─── */
+/* ─── Mechanics Page — click navigates to /userprofile/[userId] ─── */
 const MechanicsPage = ({ api, setToast }) => {
+  const router = useRouter();
   const [mechanics, setMechanics] = useState([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
-  const [selected, setSelected]   = useState(null);
 
   useEffect(() => {
     api('/mechanics')
@@ -260,7 +203,7 @@ const MechanicsPage = ({ api, setToast }) => {
     <div className="page">
       <div className="page-hdr">
         <div className="page-title">الميكانيكيون 🔧</div>
-        <div className="page-sub">{mechanics.length} ميكانيكي متاح — اضغط على الكارد لعرض المعلومات</div>
+        <div className="page-sub">{mechanics.length} ميكانيكي متاح — اضغط على الكارد لعرض الملف الشخصي</div>
       </div>
       <div className="inp-wrap" style={{ marginBottom:'1.2rem' }}>
         <span className="ico">🔍</span>
@@ -271,7 +214,12 @@ const MechanicsPage = ({ api, setToast }) => {
         : (
           <div className="mech-grid">
             {filtered.map(m => (
-              <div key={m._id} className="mech-card" onClick={() => setSelected(m)} style={{ cursor:'pointer' }}>
+              <div
+                key={m._id}
+                className="mech-card"
+                onClick={() => router.push(`/userprofile/${m._id}`)}
+                style={{ cursor:'pointer' }}
+              >
                 <div className="mech-avatar">🔧</div>
                 <div className="mech-name">{m.fullName}</div>
                 <div className="mech-user">@{m.username}</div>
@@ -283,13 +231,12 @@ const MechanicsPage = ({ api, setToast }) => {
                   </div>
                 )}
                 <div style={{ marginTop:'1rem', padding:'.5rem', background:'rgba(14,165,233,.08)', border:'1px solid rgba(14,165,233,.18)', borderRadius:9, textAlign:'center', fontSize:'.8rem', color:'#38bdf8', fontWeight:700 }}>
-                  👁️ عرض المعلومات
+                  👁️ عرض الملف الشخصي
                 </div>
               </div>
             ))}
           </div>
         )}
-      <MechanicDetailModal mechanic={selected} onClose={() => setSelected(null)}/>
     </div>
   );
 };
@@ -331,7 +278,6 @@ const MechanicReviewsPage = ({ api, mechanic, setToast, onBack }) => {
   );
 };
 
-/* ─── Write Review — only accessible after resolved breakdown ─── */
 const WriteReviewPage = ({ api, mechanic, setToast, onBack }) => {
   const [form, setForm] = useState({ rating:0, comment:'' });
   const [loading, setLoading] = useState(false);
@@ -591,11 +537,10 @@ const PostBreakdownPage = ({ accessToken, setToast, onDone }) => {
   );
 };
 
-/* ─── My Breakdowns — يفتح PDF من reportData (JSON) بدل ملف من السيرفر ─── */
 const MyBreakdownsPage = ({ api, accessToken, setToast, onNew, onViewProposals, onWriteReview }) => {
   const [breakdowns, setBreakdowns] = useState([]);
   const [loading, setLoading]       = useState(true);
-  const [pdfModal, setPdfModal]     = useState(null); // { reportData }
+  const [pdfModal, setPdfModal]     = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -634,7 +579,7 @@ const MyBreakdownsPage = ({ api, accessToken, setToast, onNew, onViewProposals, 
             {breakdowns.map(b => {
               const hasProposals = (b.proposalCount||0) > 0;
               const isResolved   = b.status === 'resolved';
-              const hasReport    = !!b.reportData; // ✅ تحقق من وجود reportData
+              const hasReport    = !!b.reportData;
 
               return (
                 <div key={b._id} className="bd-card">
@@ -664,7 +609,6 @@ const MyBreakdownsPage = ({ api, accessToken, setToast, onNew, onViewProposals, 
                   <div className="bd-title">{b.title}</div>
                   <div className="bd-desc">{b.description}</div>
 
-                  {/* ─── Resolved: PDF + Review ─── */}
                   {isResolved && (
                     <div style={{ display:'flex', gap:'.7rem', margin:'.8rem 0', flexWrap:'wrap' }}>
                       {hasReport && (
@@ -702,7 +646,6 @@ const MyBreakdownsPage = ({ api, accessToken, setToast, onNew, onViewProposals, 
           </div>
         )}
 
-      {/* PDF Modal — يولّد PDF من reportData */}
       {pdfModal && <PdfViewerModal reportData={pdfModal.reportData} onClose={() => setPdfModal(null)}/>}
     </div>
   );
